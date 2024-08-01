@@ -1,0 +1,87 @@
+{% include 'layout.html' %}
+<div class="container mt-5">
+  <h3>
+    Reports:
+  </h3>
+
+  <!-- chat log -->
+  <div>
+    <div class="card text-center mt-3">
+      <div class="card-header">
+        Chat Log OpenAI direct:
+      </div>
+      <div class="card-body">
+        {% for log in chat_log %}
+        <div>
+          - {{log}}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- chat log response -->
+  <div>
+    <div class="card text-center mt-3">
+      <div class="card-header">
+        Chat Log Response OpenAI direct:
+      </div>
+      <div class="card-body">
+        {% for log_response in chat_log_responses %}
+        <div>
+          - {{log_response}}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- guard -->
+  <div>
+    <div class="card text-center mt-3">
+      <div class="card-header">
+        Guard:
+      </div>
+      <div class="card-body">
+        {% for g in guard %}
+        <div>
+          - {{g}}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- guard log -->
+  <div>
+    <div class="card text-center mt-3">
+      <div class="card-header">
+        Guard Log:
+      </div>
+      <div class="card-body">
+        {% for g_log in guard_log %}
+        <div>
+          - {{g_log}}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- guard log response-->
+  <div>
+    <div class="card text-center mt-3">
+      <div class="card-header">
+        Guard Log Response:
+      </div>
+      <div class="card-body">
+        {% for g_log_res in guard_log_responses %}
+        <div>
+          - {{g_log_res}}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>
