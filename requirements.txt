@@ -4,3 +4,5 @@ openai
 requests
 aiofiles
 jinja2
+PyJWT
+python-multipart
