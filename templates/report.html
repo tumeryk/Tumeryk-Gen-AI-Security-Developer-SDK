@@ -12,7 +12,7 @@
         <div>
           {% for log in chat_log %}
           <div>
-            - {{log}}
+            {{ loop.index }}. {{ log }}
           </div>
           {% endfor %}
         </div>
@@ -28,7 +28,7 @@
         <div>
           {% for log_response in chat_log_responses %}
           <div>
-            - {{log_response}}
+            {{ loop.index }}. {{ log_response }}
           </div>
           {% endfor %}
         </div>
@@ -44,7 +44,7 @@
         <div>
           {% for g in guard %}
           <div>
-            - {{g}}
+            {{ loop.index }}. {{ g }}
           </div>
           {% endfor %}
         </div>
@@ -60,7 +60,7 @@
         <div>
           {% for g_log in guard_log %}
           <div>
-            - {{g_log}}
+            {{ loop.index }}. {{ g_log }}
           </div>
           {% endfor %}
         </div>

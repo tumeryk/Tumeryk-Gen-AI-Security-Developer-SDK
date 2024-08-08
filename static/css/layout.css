@@ -1,0 +1,24 @@
+.btn {
+    background-color: #172e6c !important; /* rgb(23, 46, 108) */
+    color: white !important;
+  }
+  .materialize-textarea {
+    border-bottom: 1px solid rgb(23, 46, 108) !important;
+    box-shadow: 0 1px 0 0 rgb(23, 46, 108) !important;
+  }
+  .styled-select {
+    border-bottom: 1px solid rgb(23, 46, 108) !important;
+    box-shadow: 0 1px 0 0 rgb(23, 46, 108) !important;
+    color: rgb(23, 46, 108) !important;
+  }
+  .input-field label {
+    color: rgb(23, 46, 108) !important;
+  }
+  .input-field .select-dropdown {
+    border-bottom: 1px solid rgb(23, 46, 108) !important;
+    box-shadow: 0 1px 0 0 rgb(23, 46, 108) !important;
+    color: black !important;
+  }
+  .input-field .dropdown-content li>a, .input-field .dropdown-content li>span {
+    color: rgb(23, 46, 108) !important;
+  }
