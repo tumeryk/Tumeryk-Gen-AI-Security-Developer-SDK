@@ -1,28 +1,96 @@
 {% include 'layout.html' %}
-<div class="container mt-5">
-  <h3>
-    Add input to chat
-  </h3>
+<div class="container">
+  <h4 class="center-align">
+    Add Input
+  </h4>
   <form action="/portal" method="POST">
-    <div>
-      <textarea class="form-control" placeholder="Add input here" name="user_input" rows="3"></textarea>
-      <button class="btn btn-primary mt-1" type="submit">Send</button>
+    <div class="input-field">
+      <select id="configSelect" class="styled-select">
+        <option value="" disabled selected>Choose your option</option>
+        {% for config in configs_list %}
+          <option value="{{ config }}">{{ config }}</option>
+        {% endfor %}
+      </select>
+      <label>Configurations</label>
     </div>
+    
+    <div class="input-field">
+      <textarea class="materialize-textarea" placeholder="Add input here" name="user_input" rows="3"></textarea>
+      <button class="btn waves-effect waves-light" type="submit">Send</button>
+    </div>
+
   </form>
 
-  <div>
-    <div class="card text-center mt-3">
-      <div class="card-header">
-        Chat History:
-      </div>
-      <div class="card-body">
-        {% for response in chat_responses %}
+  <div class="section">
+    <div class="card">
+      <div class="card-content">
+        <span class="card-title">Open AI Responses:</span>
         <div>
-          - {{response}}
+          {% for response in chat_responses %}
+          <div class="chat-response">
+            - {{ response }}
+          </div>
+          {% endfor %}
         </div>
-        {% endfor %}
       </div>
     </div>
   </div>
-
 </div>
+
+<style>
+  .btn {
+    background-color: #172e6c !important; /* rgb(23, 46, 108) */
+    color: white !important;
+  }
+  .materialize-textarea {
+    border-bottom: 1px solid rgb(23, 46, 108) !important;
+    box-shadow: 0 1px 0 0 rgb(23, 46, 108) !important;
+  }
+  .styled-select {
+    border-bottom: 1px solid rgb(23, 46, 108) !important;
+    box-shadow: 0 1px 0 0 rgb(23, 46, 108) !important;
+  }
+  .input-field label {
+    color: rgb(23, 46, 108) !important;
+  }
+  .input-field .select-dropdown {
+    border-bottom: 1px solid rgb(23, 46, 108) !important;
+    box-shadow: 0 1px 0 0 rgb(23, 46, 108) !important;
+  }
+  .input-field .dropdown-content li>a, .input-field .dropdown-content li>span {
+    color: black !important;
+  }
+  .input-field .dropdown-content li.active>a, .input-field .dropdown-content li.active>span {
+    color: rgb(23, 46, 108) !important;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('select');
+    var instances = M.FormSelect.init(elems);
+    
+    // Add event listener to the select element
+    document.getElementById('configSelect').addEventListener('change', function() {
+      var selectedConfig = this.value;
+
+      // Fetch the cookie value
+      var proxyCookie = document.cookie.split('; ').find(row => row.startsWith('proxy=')).split('=')[1];
+
+      fetch('/config_id?config_id=' + selectedConfig, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${proxyCookie}`  // Include the proxy cookie in the headers
+        }
+      }).then(response => response.json())
+        .then(data => {
+          console.log('Config changed:', data);
+        }).catch(error => {
+          console.error('Error changing config:', error);
+        });
+    });
+  });
+</script>
