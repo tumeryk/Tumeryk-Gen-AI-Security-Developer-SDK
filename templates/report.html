@@ -58,11 +58,24 @@
       <div class="card-content">
         <span class="card-title">Guard Log Response:</span>
         <div>
-          {% for g_log in guard_log %}
-          <div>
-            {{ loop.index }}. {{ g_log }}
-          </div>
-          {% endfor %}
+          <table class="highlight">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Config ID</th>
+                <th>Log</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for g_log in guard_log %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ g_log.config_id }}</td>
+                <td>{{ g_log.log }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -76,7 +89,7 @@
         <div>
           {% for g_log_res in guard_log_responses %}
           <div>
-            - {{g_log_res}}
+            Config ID: {{ g_log_res.config_id }} - Response: {{ g_log_res.response }}
           </div>
           {% endfor %}
         </div>
