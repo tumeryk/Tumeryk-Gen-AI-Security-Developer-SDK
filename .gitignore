@@ -66,3 +66,6 @@ tool/*test*
 # Misc. files in tool/
 tool/.cache/
 tool/demo.py
+
+#environment file
+.env
