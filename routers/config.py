@@ -4,6 +4,7 @@ from utils.user_data import get_user_data
 
 router = APIRouter()
 
+
 @router.get("/config_id")
 async def set_config(config_id: str, request: Request):
     """Set the configuration ID to be used by the user."""

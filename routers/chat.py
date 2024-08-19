@@ -13,6 +13,7 @@ templates = Jinja2Templates(directory="templates")
 router = APIRouter()
 api_client = client
 
+
 @router.get("/portal", response_class=HTMLResponse)
 async def chat_page(request: Request):
     """Render the chat portal page if the user is authenticated."""
@@ -31,11 +32,10 @@ async def chat_page(request: Request):
         )
     return templates.TemplateResponse("login.html", {"request": request})
 
+
 @router.post("/portal", response_class=HTMLResponse)
 async def chat(
-    request: Request,
-    background_tasks: BackgroundTasks,
-    user_input: str = Form()
+    request: Request, background_tasks: BackgroundTasks, user_input: str = Form()
 ):
     """Handle chat input and generate a response using the selected model."""
     post_cookie = request.cookies.get("proxy")
@@ -44,11 +44,9 @@ async def chat(
 
     user_data = get_user_data(user)
 
-
-
     api_client.token = post_cookie  # Set the token for the API client
 
-    background_tasks.add_task(runasync,user_input,user,user_data)
+    background_tasks.add_task(runasync, user_input, user, user_data)
     return templates.TemplateResponse(
         "home.html",
         {
@@ -58,8 +56,8 @@ async def chat(
         },
     )
 
-def runasync(input,user_name,user_data):
 
+def runasync(input, user_name, user_data):
 
     start_bot_time = time.time()
     chat_response = api_client.chat(input)
@@ -76,7 +74,7 @@ def runasync(input,user_name,user_data):
     violation = False
     if guard_response == "Sorry, I can't assist with that.":
         violation = True
-    
+
     user_data.chat_log.append(input)
     user_data.chat_responses.append(chat_response)
     user_data.guard.append(input)
@@ -84,16 +82,17 @@ def runasync(input,user_name,user_data):
     # Log the interaction
     log_interaction(
         user=user_name,
-        role="user", 
-        message=input, 
-        bot_response_time=bot_response_time, 
-        guard_response_time=guard_response_time, 
-        model = api_client.user_data.models[user_data.config_id]["model_name"],
-        config_id= user_data.config_id,
-        bot_response=chat_response, 
-        guard_response=guard_response, 
-        violation=violation
+        role="user",
+        message=input,
+        bot_response_time=bot_response_time,
+        guard_response_time=guard_response_time,
+        model=api_client.user_data.models[user_data.config_id]["model_name"],
+        config_id=user_data.config_id,
+        bot_response=chat_response,
+        guard_response=guard_response,
+        violation=violation,
     )
+
 
 @router.get("/reports", response_class=HTMLResponse)
 async def reports(request: Request):
@@ -107,7 +106,7 @@ async def reports(request: Request):
 
         # Directly access the config_id attribute
         config_id = getattr(user_data, "config_id", None)
-    print(user_data.chat_responses,user_data.guard_log)
+    print(user_data.chat_responses, user_data.guard_log)
     return templates.TemplateResponse(
         "report.html",
         {

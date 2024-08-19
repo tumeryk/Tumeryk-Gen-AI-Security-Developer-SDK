@@ -69,3 +69,5 @@ tool/demo.py
 
 #environment file
 .env
+utils/test.py
+routers/ip.py

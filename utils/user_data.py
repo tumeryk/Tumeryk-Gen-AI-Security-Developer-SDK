@@ -1,5 +1,6 @@
 class UserData:
     """Class to store data associated with each user."""
+
     def __init__(self):
         self.chat_log = []
         self.chat_responses = []
@@ -12,6 +13,7 @@ class UserData:
 
 
 db_dict = {}
+
 
 def get_user_data(username: str) -> UserData:
     """Retrieve or create the UserData for the specified user."""
