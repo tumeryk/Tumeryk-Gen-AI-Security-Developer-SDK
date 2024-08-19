@@ -7,11 +7,14 @@ from utils.user_data import get_user_data
 from utils.logger import log_interaction
 from utils.api_client import client
 from fastapi.templating import Jinja2Templates
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # Load environment variables from .env
 
 templates = Jinja2Templates(directory="templates")
 router = APIRouter()
 api_client = client
-
 # Move the JWT secret key to an environment variable
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
@@ -108,8 +111,8 @@ def runasync(user_input, user_name, user_data):
         user=user_name,
         role="user",
         message=user_input,
-        bot_response_time=f"{bot_response_time:.2f} seconds",  # Time formatted for clarity
-        guard_response_time=f"{guard_response_time:.2f} seconds",  # Time formatted for clarity
+        bot_response_time=f"{bot_response_time:.2f}",
+        guard_response_time=f"{guard_response_time:.2f}",
         model=api_client.user_data.models[user_data.config_id]["model_name"],
         config_id=user_data.config_id,
         bot_response=chat_response,

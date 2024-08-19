@@ -6,15 +6,22 @@ from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain_community.llms import Cohere, Anthropic, HuggingFaceHub
 from utils.user_data import get_user_data
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class ApiClient:
     """API Client for Proxy Guard Core"""
 
-    def __init__(self, base_url="http://chat-dev.tmryk.com", jwt_secret=None):
+    def __init__(
+        self,
+        base_url="http://chat-dev.tmryk.com",
+        jwt_secret=os.getenv("JWT_SECRET_KEY"),
+    ):
         self.base_url = base_url
         self.token = None
-        self.jwt_secret = jwt_secret or os.getenv("JWT_SECRET_KEY")
+        self.jwt_secret = jwt_secret
         self.user_data = None  # Initialize user data as None
 
     def login(self, username: str, password: str):
@@ -146,5 +153,6 @@ class ApiClient:
             return {"error": "Invalid token"}
         except Exception as e:
             return {"error": str(e)}
+
 
 client = ApiClient()
