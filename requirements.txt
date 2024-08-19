@@ -6,3 +6,6 @@ aiofiles
 jinja2
 PyJWT
 python-multipart
+langchain
+langchain_community
+jwt

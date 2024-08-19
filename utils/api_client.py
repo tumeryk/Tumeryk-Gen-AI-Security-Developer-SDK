@@ -1,10 +1,10 @@
+import os
 import requests
+import jwt
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain_community.llms import Cohere, Anthropic, HuggingFaceHub
-import os
-import jwt
 from utils.user_data import get_user_data
 
 
@@ -14,7 +14,7 @@ class ApiClient:
     def __init__(self, base_url="http://chat-dev.tmryk.com", jwt_secret=None):
         self.base_url = base_url
         self.token = None
-        self.jwt_secret = jwt_secret or os.getenv("JWT_SECRET_KEY", "abc1234")
+        self.jwt_secret = jwt_secret or os.getenv("JWT_SECRET_KEY")
         self.user_data = None  # Initialize user data as None
 
     def login(self, username: str, password: str):
@@ -70,13 +70,15 @@ class ApiClient:
 
         return api_key_data
 
-    def _extract_model_details(self, api_key_data: dict) -> tuple:
+    @staticmethod
+    def _extract_model_details(api_key_data: dict) -> tuple:
         """Extract model name and API key from the API key data."""
         model_name = api_key_data.get("api_key_name").split("_")[0]
         api_key_value = api_key_data.get("api_key_value")
         return model_name, api_key_value
 
-    def initialize_llm(self, service_name: str, api_key_value: str):
+    @staticmethod
+    def initialize_llm(service_name: str, api_key_value: str):
         """Initialize the LLM based on the model name and API key."""
         if service_name == "openai":
             return ChatOpenAI(
@@ -93,7 +95,8 @@ class ApiClient:
         else:
             raise ValueError("Unsupported model name")
 
-    def _create_llm_chain(self, llm) -> LLMChain:
+    @staticmethod
+    def _create_llm_chain(llm) -> LLMChain:
         """Create an LLMChain with a predefined prompt template."""
         prompt_template = PromptTemplate(
             input_variables=["question"],
@@ -101,22 +104,21 @@ class ApiClient:
         )
         return LLMChain(llm=llm, prompt=prompt_template)
 
-    def chat(self, input: str) -> str:
-        """Send an input to the LLM directly and return the response."""
+    def chat(self, user_input: str) -> str:
+        """Send user input to the LLM directly and return the response."""
         config_id = self.user_data.config_id  # Assume config_id is already set
         llm_chain = self._get_llm_chain(config_id)
-        return llm_chain.run(question=input)
+        return llm_chain.run(question=user_input)
 
-    def chat_guard(self, input: str):
-        """Send an input to the Guard service."""
+    def chat_guard(self, user_input: str):
+        """Send user input to the Guard service."""
         config_id = self.user_data.config_id
         if not config_id:
             return {"error": "Config ID is required"}
 
         headers = self._get_headers()
         guard_url = f"{self.base_url}/v1/chat/completions"
-
-        role = {"role": "user", "content": input}
+        role = {"role": "user", "content": user_input}
         payload = {"config_id": config_id, "messages": [role], "stream": False}
 
         try:
@@ -144,6 +146,3 @@ class ApiClient:
             return {"error": "Invalid token"}
         except Exception as e:
             return {"error": str(e)}
-
-
-client = ApiClient()
