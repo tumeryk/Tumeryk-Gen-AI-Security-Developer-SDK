@@ -146,3 +146,5 @@ class ApiClient:
             return {"error": "Invalid token"}
         except Exception as e:
             return {"error": str(e)}
+
+client = ApiClient()

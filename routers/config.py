@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request
 from utils.api_client import client
-from utils.user_data import get_user_data
 
 router = APIRouter()
 

@@ -26,7 +26,7 @@ def setup_logger(user: str):
 
         # Write headers to the CSV file
         headers = (
-            "Timestamp,User,Level,Role,Message,BotResponseTime,GuardResponseTime,"
+            "Timestamp,User,Level,Message,BotResponseTime,GuardResponseTime,"
             "Model,ConfigID,BotResponse,GuardResponse,Violation"
         )
         logger.info(headers)
@@ -50,7 +50,7 @@ def log_interaction(
     logger = setup_logger(user)
 
     log_message = (
-        f'{role},"{message}",{bot_response_time},{guard_response_time},"{model}","{config_id}",'
+        f'"{message}",{bot_response_time},{guard_response_time},"{model}","{config_id}",'
         f'"{bot_response}","{guard_response}",{violation}'
     )
 

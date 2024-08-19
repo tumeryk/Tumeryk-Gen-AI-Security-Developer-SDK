@@ -1,17 +1,30 @@
-from fastapi import APIRouter, Form, BackgroundTasks, Depends, Request, HTTPException
+from fastapi import APIRouter, Form, BackgroundTasks, Request, HTTPException
 from fastapi.responses import HTMLResponse
 import time
 import jwt
-
+import os
 from utils.user_data import get_user_data
 from utils.logger import log_interaction
 from utils.api_client import client
 from fastapi.templating import Jinja2Templates
 
 templates = Jinja2Templates(directory="templates")
-
 router = APIRouter()
 api_client = client
+
+# Move the JWT secret key to an environment variable
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+
+
+def measure_time(func, *args, **kwargs):
+    """
+    Utility function to measure the execution time of a function in  seconds.
+    """
+    start_time = time.time()
+    result = func(*args, **kwargs)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    return result, elapsed_time
 
 
 @router.get("/portal", response_class=HTMLResponse)
@@ -19,17 +32,22 @@ async def chat_page(request: Request):
     """Render the chat portal page if the user is authenticated."""
     cookie = request.cookies.get("proxy")
     if cookie:
-        decode = jwt.decode(cookie, algorithms="HS256", key="abc1234")
-        user = decode.get("sub")
-        user_data = get_user_data(user)
-        return templates.TemplateResponse(
-            "home.html",
-            {
-                "request": request,
-                "chat_responses": user_data.chat_responses,
-                "configs_list": user_data.configs,
-            },
-        )
+        try:
+            decode = jwt.decode(cookie, algorithms="HS256", key=JWT_SECRET_KEY)
+            user = decode.get("sub")
+            user_data = get_user_data(user)
+            return templates.TemplateResponse(
+                "home.html",
+                {
+                    "request": request,
+                    "chat_responses": user_data.chat_responses,
+                    "configs_list": user_data.configs,
+                },
+            )
+        except jwt.ExpiredSignatureError:
+            raise HTTPException(status_code=403, detail="Token has expired")
+        except jwt.InvalidTokenError:
+            raise HTTPException(status_code=403, detail="Invalid token")
     return templates.TemplateResponse("login.html", {"request": request})
 
 
@@ -39,53 +57,59 @@ async def chat(
 ):
     """Handle chat input and generate a response using the selected model."""
     post_cookie = request.cookies.get("proxy")
-    decode = jwt.decode(post_cookie, algorithms="HS256", key="abc1234")
-    user = decode.get("sub")
 
-    user_data = get_user_data(user)
+    if not post_cookie:
+        raise HTTPException(status_code=403, detail="Authentication cookie missing")
 
-    api_client.token = post_cookie  # Set the token for the API client
+    try:
+        decode = jwt.decode(post_cookie, algorithms="HS256", key=JWT_SECRET_KEY)
+        user = decode.get("sub")
+        user_data = get_user_data(user)
+        api_client.token = post_cookie  # Set the token for the API client
 
-    background_tasks.add_task(runasync, user_input, user, user_data)
-    return templates.TemplateResponse(
-        "home.html",
-        {
-            "request": request,
-            "chat_responses": user_data.chat_responses,
-            "configs_list": user_data.configs,
-        },
+        background_tasks.add_task(runasync, user_input, user, user_data)
+
+        return templates.TemplateResponse(
+            "home.html",
+            {
+                "request": request,
+                "chat_responses": user_data.chat_responses,
+                "configs_list": user_data.configs,
+            },
+        )
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=403, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=403, detail="Invalid token")
+
+
+def runasync(user_input, user_name, user_data):
+    # Measure bot response time
+    chat_response, bot_response_time = measure_time(api_client.chat, user_input)
+
+    # Measure guard response time
+    guard_response, guard_response_time = measure_time(
+        api_client.chat_guard, user_input
     )
-
-
-def runasync(input, user_name, user_data):
-
-    start_bot_time = time.time()
-    chat_response = api_client.chat(input)
-    end_bot_time = time.time()
-    bot_response_time = end_bot_time - start_bot_time
-
-    # Start timing the guard response
-    start_guard_time = time.time()
-    guard_response = api_client.chat_guard(input)
-    end_guard_time = time.time()
-    guard_response_time = end_guard_time - start_guard_time
 
     # Assume that a violation is determined based on the guard's response
     violation = False
     if guard_response == "Sorry, I can't assist with that.":
         violation = True
 
-    user_data.chat_log.append(input)
+    # Append logs to user_data
+    user_data.chat_log.append(user_input)
     user_data.chat_responses.append(chat_response)
-    user_data.guard.append(input)
+    user_data.guard.append(user_input)
     user_data.guard_log.append(chat_response)
+
     # Log the interaction
     log_interaction(
         user=user_name,
         role="user",
-        message=input,
-        bot_response_time=bot_response_time,
-        guard_response_time=guard_response_time,
+        message=user_input,
+        bot_response_time=f"{bot_response_time:.2f} seconds",  # Time formatted for clarity
+        guard_response_time=f"{guard_response_time:.2f} seconds",  # Time formatted for clarity
         model=api_client.user_data.models[user_data.config_id]["model_name"],
         config_id=user_data.config_id,
         bot_response=chat_response,
@@ -99,14 +123,23 @@ async def reports(request: Request):
     """Render the reports page showing logs and responses."""
     config_id = None
     cookie = request.cookies.get("proxy")
-    if cookie:
-        decode = jwt.decode(cookie, algorithms="HS256", key="abc1234")
-        user = decode.get("sub")
-        user_data = get_user_data(user)  # Retrieve the UserData object
+    user_data = None  # Initialize user_data to None
 
-        # Directly access the config_id attribute
-        config_id = getattr(user_data, "config_id", None)
-    print(user_data.chat_responses, user_data.guard_log)
+    if cookie:
+        try:
+            decode = jwt.decode(cookie, algorithms="HS256", key=JWT_SECRET_KEY)
+            user = decode.get("sub")
+            user_data = get_user_data(user)  # Retrieve the UserData object
+            # Directly access the config_id attribute
+            config_id = getattr(user_data, "config_id", None)
+        except jwt.ExpiredSignatureError:
+            raise HTTPException(status_code=403, detail="Token has expired")
+        except jwt.InvalidTokenError:
+            raise HTTPException(status_code=403, detail="Invalid token")
+
+    if user_data is None:
+        raise HTTPException(status_code=403, detail="User data not found")
+
     return templates.TemplateResponse(
         "report.html",
         {

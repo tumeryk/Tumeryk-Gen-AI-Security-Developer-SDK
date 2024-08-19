@@ -2,7 +2,6 @@ from fastapi import (
     APIRouter,
     Form,
     Depends,
-    BackgroundTasks,
     Request,
     status,
     HTTPException,
@@ -13,7 +12,6 @@ from fastapi.templating import Jinja2Templates
 
 from utils.api_client import client
 from utils.user_data import get_user_data
-from utils.logger import log_interaction
 import requests
 
 router = APIRouter()
