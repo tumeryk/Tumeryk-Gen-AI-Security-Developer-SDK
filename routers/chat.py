@@ -9,6 +9,7 @@ from utils.api_client import client
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 import os
+from fastapi.responses import RedirectResponse
 
 load_dotenv()  # Load environment variables from .env
 
@@ -70,8 +71,13 @@ async def chat(
         user_data = get_user_data(user)
         api_client.token = post_cookie  # Set the token for the API client
 
-        background_tasks.add_task(runasync, user_input, user, user_data)
+        chat_response, bot_response_time = measure_time(api_client.chat, user_input)
+        user_data.chat_log.append(user_input)
+        user_data.chat_responses.append(chat_response)
 
+        background_tasks.add_task(
+            runasync, user_input, user, user_data, chat_response, bot_response_time
+        )
         return templates.TemplateResponse(
             "home.html",
             {
@@ -80,15 +86,14 @@ async def chat(
                 "configs_list": user_data.configs,
             },
         )
+
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=403, detail="Token has expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=403, detail="Invalid token")
 
 
-def runasync(user_input, user_name, user_data):
-    # Measure bot response time
-    chat_response, bot_response_time = measure_time(api_client.chat, user_input)
+def runasync(user_input, user_name, user_data, chat_response, bot_response_time):
 
     # Measure guard response time
     guard_response, guard_response_time = measure_time(
@@ -101,8 +106,6 @@ def runasync(user_input, user_name, user_data):
         violation = True
 
     # Append logs to user_data
-    user_data.chat_log.append(user_input)
-    user_data.chat_responses.append(chat_response)
     user_data.guard.append(user_input)
     user_data.guard_log.append(chat_response)
 

@@ -10,6 +10,8 @@ class UserData:
         self.models = {}  # Cache for storing LLM models keyed by config_id
         self.configs = []
         self.config_id = ""
+        self.llm_chain_cache = {}  # Cache for LLMChains
+        self.api_key_cache = {}  # Cache for API keys
 
 
 db_dict = {}

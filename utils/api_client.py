@@ -22,7 +22,7 @@ class ApiClient:
         self.base_url = base_url
         self.token = None
         self.jwt_secret = jwt_secret
-        self.user_data = None  # Initialize user data as None
+        self.user_data = None
 
     def login(self, username: str, password: str):
         """Authenticate and store access token and user data."""
@@ -46,9 +46,13 @@ class ApiClient:
 
     def _get_llm_chain(self, config_id: str) -> LLMChain:
         """Create and return an LLM chain with a prompt template."""
-        # Check if the model (and thus API key) is already cached
+        # Check if the LLMChain is already cached
+        if config_id in self.user_data.llm_chain_cache:
+            return self.user_data.llm_chain_cache[config_id]
+
+        # Check if the model is already cached
         if config_id in self.user_data.models:
-            llm = self.user_data.models[config_id]["llm"]
+            llm = self.user_data.models[config_id]["model"]
         else:
             # Retrieve the API key and initialize the model if not cached
             api_key_data = self._fetch_api_key(config_id)
@@ -56,11 +60,17 @@ class ApiClient:
             llm = self.initialize_llm(model_name, api_key_value)
             self.user_data.models[config_id] = {"model": llm, "model_name": model_name}
 
-        # Create and return the LLM chain
-        return self._create_llm_chain(llm)
+        # Create and cache the LLMChain
+        llm_chain = self._create_llm_chain(llm)
+        self.user_data.llm_chain_cache[config_id] = llm_chain
+
+        return llm_chain
 
     def _fetch_api_key(self, config_id: str) -> dict:
-        """Fetch the API key for the given config ID."""
+        """Fetch the API key for the given config ID, using a cache."""
+        if config_id in self.user_data.api_key_cache:
+            return self.user_data.api_key_cache[config_id]
+
         headers = self._get_headers()
         response = requests.get(
             f"{self.base_url}/llm_api_key",
@@ -75,6 +85,8 @@ class ApiClient:
                 f"No API key was found for Config ID: {config_id}. Response: {response.json()}"
             )
 
+        # Cache the API key for future use
+        self.user_data.api_key_cache[config_id] = api_key_data
         return api_key_data
 
     @staticmethod
