@@ -1,5 +1,5 @@
 
-# Proxy Guard Core
+# Tumeryk Proxy
 
 ## Overview
 Proxy Guard is designed for secure interaction with various language models directly and the guard.
@@ -30,10 +30,10 @@ Proxy Guard is designed for secure interaction with various language models dire
      JWT_SECRET_KEY=your_jwt_secret
      ```
 
-4. Run the application:
+4. Request access to Tumeryk:
+   - Sign up at https://tumeryk.com/sign-up to create your user ID and password.
+
+6. Run the application:
    ```bash
    uvicorn main:app --reload
    ```
-
-## License
-Please read the Tumeryk SaaS Evaluation Agreement
