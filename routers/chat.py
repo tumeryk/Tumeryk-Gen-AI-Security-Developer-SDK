@@ -115,9 +115,9 @@ def runasync(user_input, user_name, user_data, chat_response, bot_response_time)
         message=user_input,
         bot_response_time=f"{bot_response_time:.2f}",
         guard_response_time=f"{guard_response_time:.2f}",
-        engine=api_client.user_data.models[user_data.config_id]["engine"],
-        model=api_client.user_data.models[user_data.config_id]["model"],
-        config_id=user_data.config_id,
+        engine=api_client.user_data.models[api_client.user_data.config_id]["engine"],
+        model=api_client.user_data.models[api_client.user_data.config_id]["model"],
+        config_id=api_client.user_data.config_id,
         bot_response=chat_response,
         guard_response=guard_response,
         violation=violation,
@@ -134,10 +134,10 @@ async def reports(request: Request):
     if cookie:
         try:
             decode = jwt.decode(cookie, algorithms="HS256", key=JWT_SECRET_KEY)
-            user = decode.get("sub")
-            user_data = get_user_data(user)  # Retrieve the UserData object
+            # user = decode.get("sub")
+            # user_data = get_user_data(user)  # Retrieve the UserData object
             # Directly access the config_id attribute
-            config_id = getattr(user_data, "config_id", None)
+            config_id = api_client.user_data.config_id
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=403, detail="Token has expired")
         except jwt.InvalidTokenError:

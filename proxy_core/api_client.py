@@ -7,7 +7,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain_anthropic import AnthropicLLM
 
 from langchain_community.llms import Cohere, HuggingFaceHub
-from proxy_core.user_data import get_user_data
+from user_data import get_user_data
 from dotenv import load_dotenv
 import yaml
 
@@ -17,18 +17,14 @@ load_dotenv()
 class ApiClient:
     """API Client for Proxy Guard Core"""
 
-    def __init__(
-        self,
-        base_url=os.getenv("URL"),
-        jwt_secret=os.getenv("JWT_SECRET_KEY"),
-    ):
+    def __init__(self, base_url=os.getenv("BASE_URL")):
         self.base_url = base_url
         self.token = None
-        self.jwt_secret = jwt_secret
         self.user_data = None  # Initialize user data as None
 
     def login(self, username: str, password: str):
         """Authenticate and store access token and user data."""
+        print(username,password,self.base_url)
         payload = {"grant_type": "password", "username": username, "password": password}
         response = requests.post(f"{self.base_url}/auth/token", data=payload)
         response.raise_for_status()
@@ -187,21 +183,11 @@ class ApiClient:
 
     def set_config(self, config_id: str):
         """Set the configuration ID to be used by the user."""
-        if not self.token:
-            raise ValueError("Authorization token is not set. Please login first.")
-
-        try:
-            decode = jwt.decode(self.token, algorithms="HS256", key=self.jwt_secret)
-            user_info = decode.get("sub")
-            self.user_data = get_user_data(user_info)
-            self.user_data.config_id = config_id
-            return {"config": f"config to use in proxy: {config_id}"}
-        except jwt.ExpiredSignatureError:
-            return {"error": "Token has expired"}
-        except jwt.InvalidTokenError:
-            return {"error": "Invalid token"}
-        except Exception as e:
-            return {"error": str(e)}
+        if not self.user_data:
+            raise ValueError("User data not set. Please login first.")
+        
+        self.user_data.config_id = config_id
+        return {"config": f"config to use in proxy: {config_id}"}
 
 
 client = ApiClient()

@@ -1,13 +1,17 @@
 import time
-from api_client import ApiClient
-
+from proxy_core.api_client import ApiClient
+import os
 
 def test_api_client():
     # Initialize the API client
-    api_client = ApiClient(base_url="http://localhost:8000")
+    url = os.getenv("BASE_URL")
+    username = os.getenv("USERNAME")
+    password = os.getenv("PASSWORD")
+    print(url,username,password)
+    api_client = ApiClient(url)
 
     # Step 1: Login with your username and password
-    login_response = api_client.login(username="nirmitCliente", password="abc123")
+    login_response = api_client.login(username=username, password= password)
     print(api_client.base_url)
     print(
         "Login Response:", login_response

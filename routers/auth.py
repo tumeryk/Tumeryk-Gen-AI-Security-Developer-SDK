@@ -19,7 +19,7 @@ router = APIRouter()
 api_client = client
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/creds/")
 templates = Jinja2Templates(directory="templates")
-url = os.getenv("URL")
+url = os.getenv("BASE_URL")
 
 
 @router.post("/login")
