@@ -36,8 +36,8 @@ This project is a FastAPI-based web application that allows users to log in, int
 - **POST `/portal`**: Handles chat input and generates a response using the selected model.
   - **Parameters**: `user_input` (via form data).
   - **Response**: HTML page with the updated chat.
-- **GET `/reports`**: Renders the reports page showing logs and responses.
-  - **Response**: HTML page with logs.
+- **GET `/reports`**: Renders the reports page showing responses.
+  - **Response**: HTML page with responses.
 
 ### Configuration Management
 - **GET `/config_id`**: Sets the configuration ID to be used by the user.
