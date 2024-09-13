@@ -10,7 +10,7 @@ This project is a FastAPI-based web application that allows users to log in, int
 - **`auth.py`**: Handles user authentication, including login and token management.
 - **`chat.py`**: Manages the chat interactions, rendering the portal, handling user inputs, and generating reports.
 - **`config.py`**: Manages configuration settings such as setting a configuration ID for the user.
-- **`utils/`**: Contains utility modules used across the application.
+- **`tumeryk_proxy/`**: Contains utility modules used across the application.
   - **`api_client.py`**: Manages API interactions, including logging in users, handling tokens, and interacting with the language models.
   - **`user_data.py`**: Handles user-specific data management.
   - **`logger.py`**: Manages logging of interactions, storing them in user-specific log files.
