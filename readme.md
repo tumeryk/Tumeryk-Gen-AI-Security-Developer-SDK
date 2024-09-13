@@ -41,7 +41,7 @@ Tumeryk Proxy is designed for secure interaction with LLMs and the Guard system.
 ## Running Tumeryk Proxy API Client
 
 ### Overview
-The `ApiClient` class allows direct interaction with the Tumeryk Proxy Core API, enabling authentication and communication with language models like OpenAI, Cohere, Anthropic, and HuggingFaceHub.
+The `ApiClient` class allows direct interaction with the Tumeryk Proxy API.
 
 ### Example Usage
 
