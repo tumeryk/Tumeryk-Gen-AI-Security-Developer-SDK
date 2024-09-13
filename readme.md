@@ -128,7 +128,7 @@ You can directly interact with LLMs by sending a message and getting a response 
 
 #### Sending a Message to the Guard
 
-The `chat_guard` method allows you to send a message to Tumeryk's Guard system, which processes the request for additional security checks or constraints.
+The `chat_guard` method allows you to send a message to Tumeryk's Guard system, which processes the request for additional security checks or constraints based on the policy.
 
 - **Method:** `chat_guard(user_input: str) -> dict`
 - **Description:** Sends a message to the Guard service and returns its processed response.
@@ -161,3 +161,4 @@ The `chat_guard` method allows you to send a message to Tumeryk's Guard system, 
 ## Environment Variables
 
 - **BASE_URL**: The base url for the proxy client. Default is `https://chat.tmryk.com`
+- **JWT_SECRET_KEY** The JWT Token: used in the UI Client backend. 
