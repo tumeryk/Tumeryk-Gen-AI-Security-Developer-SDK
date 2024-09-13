@@ -47,7 +47,6 @@ Tumeryk Proxy is designed for secure interaction with LLMs and the Tumeryk Guard
    ```bash
    uvicorn main:app --reload
    ```
-   The UI handles authentication with JWT tokens, stored in environment variables like `JWT_SECRET_KEY`.
 
 ## Running Tumeryk Proxy API Client
 
