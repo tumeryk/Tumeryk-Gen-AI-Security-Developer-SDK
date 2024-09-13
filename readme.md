@@ -68,22 +68,7 @@ ApiClient(base_url="http://chat.tmryk.com", jwt_secret=os.getenv("JWT_SECRET_KEY
 
 ### API Client Features
 
-#### Setting the Configuration (Required Before Other Operations)
-
-Before interacting with language models or the Guard, you must set a configuration ID, which defines the settings or model configurations to be used.
-
-- **Method:** `set_config(config_id: str) -> dict`
-- **Description:** Sets the configuration to be used by the user.
-  
-  **Parameters:**
-  - `config_id`: The ID of the configuration you want to apply.
-  
-  **Example:**
-  ```python
-   client.set_config("hr_policy")
-  ```
-
-#### Authentication
+#### Authentication (Required Before Other Operations)
 
 You need to authenticate using your Tumeryk username and password to retrieve an access token and use other features.
 
@@ -96,10 +81,23 @@ You need to authenticate using your Tumeryk username and password to retrieve an
   
   **Example:**
   ```python
-  auth_response = client.login("my_username", "my_password")
-  print(auth_response)
+    client.login("my_username", "my_password")
   ```
 
+#### Setting the Configuration (Required Before Other Operations)
+
+Before interacting with language models or the Guard, you must set a configuration/policy, which defines the model policy to be used.
+
+- **Method:** `set_config(config_id: str) -> dict`
+- **Description:** Sets the configuration to be used by the user.
+  
+  **Parameters:**
+  - `config_id`: The ID of the configuration you want to apply.
+  
+  **Example:**
+  ```python
+   client.set_config("hr_policy")
+  ```
 #### Sending a Message to a Language Model
 
 You can directly interact with LLMs by sending a message and getting a response from the chosen model. **Note:** You must set a configuration using `set_config` before sending a message.
