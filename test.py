@@ -1,5 +1,5 @@
 import time
-from proxy_core.api_client import ApiClient
+from tumeryk_proxy.api_client import ApiClient
 import os
 
 def test_api_client():

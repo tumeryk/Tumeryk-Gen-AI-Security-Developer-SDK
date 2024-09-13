@@ -10,8 +10,8 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.templating import Jinja2Templates
 
-from proxy_core.api_client import client
-from proxy_core.user_data import get_user_data
+from tumeryk_proxy.api_client import client
+from tumeryk_proxy.user_data import get_user_data
 import requests
 import os
 

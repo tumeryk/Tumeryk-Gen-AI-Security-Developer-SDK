@@ -3,9 +3,9 @@ from fastapi.responses import HTMLResponse
 import time
 import jwt
 import os
-from proxy_core.user_data import get_user_data
-from proxy_core.logger import log_interaction
-from proxy_core.api_client import client
+from tumeryk_proxy.user_data import get_user_data
+from tumeryk_proxy.logger import log_interaction
+from tumeryk_proxy.api_client import client
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 import os

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request
-from proxy_core.api_client import client
+from tumeryk_proxy.api_client import client
 
 router = APIRouter()
 
