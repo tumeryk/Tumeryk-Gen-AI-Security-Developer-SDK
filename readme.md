@@ -9,7 +9,7 @@ Tumeryk Proxy is designed for secure interaction with LLMs and the Tumeryk Guard
 - **Tumeryk Proxy** can be run in two ways: (1) via the pre-built Client UI or (2) programmatically with the API client. The instructions below demonstrate programmatic usage in Python.
 
 
-- **UI**: The Tumeryk Proxy UI offers a limited interface with integrated logging and configuration management for demo purposes. More information about the UI can be found in `/docs.md`
+- **UI**: The Tumeryk Proxy UI offers a limited interface with integrated logging and configuration management for demo purposes. More information about the UI can be found in [docs.md](https://github.com/tumeryk/Tumeryk-Gen-AI-Security-Developer-SDK/blob/develop/docs.md)
 
 - **API Client**: The `ApiClient` class provides direct, programmatic interaction with Tumeryk services. Logging can be integrated via use of `tumeryk_proxy/logger.py` More information about the API Client is listed below. 
 
