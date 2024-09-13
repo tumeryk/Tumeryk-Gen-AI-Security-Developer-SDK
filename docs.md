@@ -87,13 +87,13 @@ This project is a FastAPI-based web application that allows users to log in, int
 ## How It Works
 
 ### User Authentication:
-- Users authenticate by sending their credentials to the `/login` endpoints. If successful, a JWT token is issued and used for subsequent requests.
+- Users authenticate by sending their credentials to the `/login` or `/creds` endpoints. If successful, a JWT token is issued and used for subsequent requests.
 
 ### Chat Interaction:
 - Authenticated users can access the chat portal where they can input text. The input is processed by a selected language model (e.g., OpenAI), and the response is displayed. Interaction logs are saved for future reference.
 
 ### Logging and Reports:
-- All user interactions are logged, including the time taken for responses from both the language model and the guard service. Users can view these logs on the reports page.
+- All user interactions are logged, including the time taken for responses from both the language model and the guard service. Users can view these logs locally and reports on the reports page.
 
 ### Configuration Management:
 - Users can set and manage their configuration IDs, which determine which model or service is used during interactions.

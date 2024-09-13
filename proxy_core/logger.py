@@ -2,7 +2,7 @@ import os
 import logging
 from datetime import datetime
 
-LOG_DIRECTORY = "./logs"
+LOG_DIRECTORY = os.getenv("LOG_DIRECTORY", "./logs")
 
 
 def setup_logger(user: str):
@@ -27,7 +27,7 @@ def setup_logger(user: str):
         # Write headers to the CSV file
         headers = (
             "Timestamp,User,Level,Message,BotResponseTime,GuardResponseTime,"
-            "Model,ConfigID,BotResponse,GuardResponse,Violation"
+            "Engine,Model,ConfigID,BotResponse,GuardResponse,Violation"
         )
         logger.info(headers)
 
@@ -36,10 +36,10 @@ def setup_logger(user: str):
 
 def log_interaction(
     user: str,
-    role: str,
     message: str,
     bot_response_time: float,
     guard_response_time: float,
+    engine: str,
     model: str,
     config_id: str,
     bot_response: str,
@@ -50,7 +50,7 @@ def log_interaction(
     logger = setup_logger(user)
 
     log_message = (
-        f'"{message}",{bot_response_time},{guard_response_time},"{model}","{config_id}",'
+        f'"{message}",{bot_response_time},{guard_response_time},"{engine},""{model}","{config_id}",'
         f'"{bot_response}","{guard_response}",{violation}'
     )
 

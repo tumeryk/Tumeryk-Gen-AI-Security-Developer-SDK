@@ -4,9 +4,12 @@ import jwt
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
-from langchain_community.llms import Cohere, Anthropic, HuggingFaceHub
-from utils.user_data import get_user_data
+from langchain_anthropic import AnthropicLLM
+
+from langchain_community.llms import Cohere, HuggingFaceHub
+from proxy_core.user_data import get_user_data
 from dotenv import load_dotenv
+import yaml
 
 load_dotenv()
 
@@ -16,13 +19,13 @@ class ApiClient:
 
     def __init__(
         self,
-        base_url="http://chat-dev.tmryk.com",
+        base_url=os.getenv("URL"),
         jwt_secret=os.getenv("JWT_SECRET_KEY"),
     ):
         self.base_url = base_url
         self.token = None
         self.jwt_secret = jwt_secret
-        self.user_data = None
+        self.user_data = None  # Initialize user data as None
 
     def login(self, username: str, password: str):
         """Authenticate and store access token and user data."""
@@ -33,8 +36,7 @@ class ApiClient:
 
         if "access_token" in response_data:
             self.token = response_data["access_token"]
-            self.user_data = get_user_data(username)  # Initialize user data after login
-
+            self.user_data = get_user_data(username)
         return response_data
 
     def _get_headers(self):
@@ -52,13 +54,18 @@ class ApiClient:
 
         # Check if the model is already cached
         if config_id in self.user_data.models:
-            llm = self.user_data.models[config_id]["model"]
+            llm = self.user_data.models[config_id]["llm"]
         else:
             # Retrieve the API key and initialize the model if not cached
+            model, engine = self._fetch_model_and_engine_from_config(config_id)
             api_key_data = self._fetch_api_key(config_id)
-            model_name, api_key_value = self._extract_model_details(api_key_data)
-            llm = self.initialize_llm(model_name, api_key_value)
-            self.user_data.models[config_id] = {"model": llm, "model_name": model_name}
+            api_key_value = api_key_data.get("api_key_value")
+            llm = self.initialize_llm(engine, api_key_value, model)
+            self.user_data.models[config_id] = {
+                "llm": llm,
+                "engine": engine,
+                "model": model,
+            }
 
         # Create and cache the LLMChain
         llm_chain = self._create_llm_chain(llm)
@@ -89,24 +96,44 @@ class ApiClient:
         self.user_data.api_key_cache[config_id] = api_key_data
         return api_key_data
 
-    @staticmethod
-    def _extract_model_details(api_key_data: dict) -> tuple:
-        """Extract model name and API key from the API key data."""
-        model_name = api_key_data.get("api_key_name").split("_")[0]
-        api_key_value = api_key_data.get("api_key_value")
-        return model_name, api_key_value
+    def _fetch_model_and_engine_from_config(self, config_name: str) -> tuple:
+        """Fetch the model and engine from the YAML configuration."""
+        headers = self._get_headers()
+        response = requests.get(
+            f"{self.base_url}/read_config",
+            headers=headers,
+            params={"config_name": config_name},
+        )
+        response.raise_for_status()
+        config_data = response.json()
+
+        # Extract the YAML content from the response
+        yaml_content = config_data.get("config.yml")
+        if not yaml_content:
+            raise ValueError(f"YAML configuration for '{config_name}' not found.")
+
+        # Parse the YAML content
+        config = yaml.safe_load(yaml_content)
+        model_info = config.get("models", [{}])[0]
+        model_name = model_info.get("model")
+        engine_name = model_info.get("engine")
+
+        if not model_name or not engine_name:
+            raise ValueError(
+                "Model name or engine name not found in the YAML configuration."
+            )
+
+        return model_name, engine_name
 
     @staticmethod
-    def initialize_llm(service_name: str, api_key_value: str):
+    def initialize_llm(service_name: str, api_key_value: str, model: str):
         """Initialize the LLM based on the model name and API key."""
         if service_name == "openai":
-            return ChatOpenAI(
-                model="gpt-3.5-turbo", temperature=0.6, openai_api_key=api_key_value
-            )
+            return ChatOpenAI(model=model, openai_api_key=api_key_value)
         elif service_name == "cohere":
             return Cohere(api_key=api_key_value)
         elif service_name == "anthropic":
-            return Anthropic(api_key=api_key_value)
+            return AnthropicLLM(anthropic_api_key=api_key_value)
         elif service_name == "huggingface":
             return HuggingFaceHub(
                 repo_id="gpt2", huggingfacehub_api_token=api_key_value
@@ -125,15 +152,21 @@ class ApiClient:
 
     def chat(self, user_input: str) -> str:
         """Send user input to the LLM directly and return the response."""
-        config_id = self.user_data.config_id  # Assume config_id is already set
+        if not self.user_data:
+            return {"error": "User data not set. Please login"}
+        config_id = self.user_data.config_id
+        if not config_id:
+            return {"error": "Config ID is required. Please pick a policy"}
         llm_chain = self._get_llm_chain(config_id)
         return llm_chain.run(question=user_input)
 
     def chat_guard(self, user_input: str):
         """Send user input to the Guard service."""
+        if not self.user_data:
+            return {"error": "User data not set. Please login"}
         config_id = self.user_data.config_id
         if not config_id:
-            return {"error": "Config ID is required"}
+            return {"error": "Config ID is required. Please pick a policy"}
 
         headers = self._get_headers()
         guard_url = f"{self.base_url}/v1/chat/completions"
@@ -144,7 +177,11 @@ class ApiClient:
             response = requests.post(guard_url, json=payload, headers=headers)
             response.raise_for_status()
             msg = response.json()
-            return msg.get("messages")[-1].get("content")
+            print("msg", msg)
+            return [
+                msg.get("messages")[-1].get("content"),
+                msg.get("messages")[-1].get("violation"),
+            ]
         except Exception as err:
             return {"error": str(err)}
 

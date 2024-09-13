@@ -36,5 +36,4 @@ Proxy Guard is designed for secure interaction with various language models dire
    ```
 
 ## License
-This project is licensed under the MIT License. See the `LICENSE` file for details.
-
+Please read the Tumeryk SaaS Evaluation Agreement

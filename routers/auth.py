@@ -10,15 +10,16 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.templating import Jinja2Templates
 
-from utils.api_client import client
-from utils.user_data import get_user_data
+from proxy_core.api_client import client
+from proxy_core.user_data import get_user_data
 import requests
+import os
 
 router = APIRouter()
 api_client = client
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/creds/")
 templates = Jinja2Templates(directory="templates")
-url = "http://chat-dev.tmryk.com"  # customer input value
+url = os.getenv("URL")
 
 
 @router.post("/login")
@@ -42,13 +43,15 @@ def login_test(username: str = Form(), password: str = Form()):
                 },
             )
             configs_response.raise_for_status()
+
             configs_list = [
                 config.get("id")
                 for config in configs_response.json()
                 if config.get("id")
             ]
+            # print(configs_list)
             user_data.configs = configs_list  # Ensure configs are stored in UserData
-
+            print(user_data.configs)
             resp = RedirectResponse(url="/portal", status_code=status.HTTP_302_FOUND)
             resp.set_cookie("proxy", value=user_data.access_token)
             return resp

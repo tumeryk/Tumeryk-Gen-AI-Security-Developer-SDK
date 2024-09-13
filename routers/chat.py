@@ -3,9 +3,9 @@ from fastapi.responses import HTMLResponse
 import time
 import jwt
 import os
-from utils.user_data import get_user_data
-from utils.logger import log_interaction
-from utils.api_client import client
+from proxy_core.user_data import get_user_data
+from proxy_core.logger import log_interaction
+from proxy_core.api_client import client
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 import os
@@ -101,22 +101,22 @@ def runasync(user_input, user_name, user_data, chat_response, bot_response_time)
     )
 
     # Assume that a violation is determined based on the guard's response
-    violation = False
-    if guard_response == "Sorry, I can't assist with that.":
-        violation = True
+    violation = guard_response[1]
+    print(violation)
+    guard_response = guard_response[0]
 
     # Append logs to user_data
     user_data.guard.append(user_input)
-    user_data.guard_log.append(chat_response)
+    user_data.guard_log.append(guard_response)
 
     # Log the interaction
     log_interaction(
         user=user_name,
-        role="user",
         message=user_input,
         bot_response_time=f"{bot_response_time:.2f}",
         guard_response_time=f"{guard_response_time:.2f}",
-        model=api_client.user_data.models[user_data.config_id]["model_name"],
+        engine=api_client.user_data.models[user_data.config_id]["engine"],
+        model=api_client.user_data.models[user_data.config_id]["model"],
         config_id=user_data.config_id,
         bot_response=chat_response,
         guard_response=guard_response,
