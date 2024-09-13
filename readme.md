@@ -1,5 +1,5 @@
 
-# Proxy Guard Core
+# Tumeryk Proxy
 
 ## Overview
 Proxy Guard is designed for secure interaction with various language models directly and the guard.
