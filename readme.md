@@ -4,6 +4,13 @@
 ## Overview
 Tumeryk Proxy is designed for secure interaction with LLMs and the Tumeryk Guard system. The two primary features are to interact with the model directly via the `chat` function and with the guard via the `chat_guard` function for a selected policy. Both of these functions can also be found in the API client. More information regarding usage can be found below under "Running Tumeryk Proxy API Client."
 
+## UI vs. API Client
+
+- **UI**: The Tumeryk Proxy UI offers a limited interface with integrated logging and configuration management for demo purposes. It uses a `JWT_SECRET_KEY` stored in the environment. 
+
+- **API Client**: The `ApiClient` class provides direct, programmatic interaction with Tumeryk services. While it doesn’t include built-in logging, it allows granular control over API requests and is easily extensible. Logging can be integrated via use of `tumeryk_proxy/logger.py`
+
+
 ## Setup Instructions
 
 ### Prerequisites
@@ -33,17 +40,11 @@ Tumeryk Proxy is designed for secure interaction with LLMs and the Tumeryk Guard
 4. Request access to Tumeryk:
    - Sign up at https://tumeryk.com/sign-up to create your user ID and password.
 
-## UI vs. API Client
-
-- **UI**: The Tumeryk Proxy UI offers a limited interface with integrated logging and configuration management for demo purposes. It uses a `JWT_SECRET_KEY` stored in the environment.
-
-   Run the application via:
+5. Run the UI via:
    ```bash
    uvicorn main:app --reload
    ```
-   The UI handles authentication with JWT tokens, stored in environment variables like `JWT_SECRET_KEY`. 
-
-- **API Client**: The `ApiClient` class provides direct, programmatic interaction with Tumeryk services. While it doesn’t include built-in logging, it allows granular control over API requests and is easily extensible.
+   The UI handles authentication with JWT tokens, stored in environment variables like `JWT_SECRET_KEY`.
 
 ## Running Tumeryk Proxy API Client
 
