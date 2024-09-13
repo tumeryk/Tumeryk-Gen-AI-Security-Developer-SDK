@@ -8,7 +8,7 @@ Tumeryk Proxy is designed for secure interaction with LLMs and the Tumeryk Guard
 
 - **UI**: The Tumeryk Proxy UI offers a limited interface with integrated logging and configuration management for demo purposes. It uses a `JWT_SECRET_KEY` stored in the environment. More information about the UI can be found in `/docs.md`
 
-- **API Client**: The `ApiClient` class provides direct, programmatic interaction with Tumeryk services. While it doesn’t include built-in logging, it allows granular control over API requests and is easily extensible. Logging can be integrated via use of `tumeryk_proxy/logger.py`
+- **API Client**: The `ApiClient` class provides direct, programmatic interaction with Tumeryk services. While it doesn’t include built-in logging, it allows granular control over API requests and is easily extensible. Logging can be integrated via use of `tumeryk_proxy/logger.py` More information about the API Client is listed below. 
 
 
 ## Setup Instructions
