@@ -78,10 +78,10 @@ ApiClient(base_url="https://chat.tmryk.com")
 
 #### Authentication (Required Before Other Operations)
 
-You need to authenticate using your Tumeryk username and password to retrieve an access token and use other features. The token is automatically handled by the API client, so no JWT_SECRET_KEY setup is necessary.
+You need to authenticate using your Tumeryk username and password to retrieve an access token and use other features. 
 
 - **Method:** `login(username: str, password: str) -> dict`
-- **Description:** Authenticates the user and stores the JWT access token within the client for further requests.
+- **Description:** Authenticates the user.
   
   **Parameters:**
   - `username`: Your Tumeryk username.
@@ -97,10 +97,10 @@ You need to authenticate using your Tumeryk username and password to retrieve an
 Before interacting with language models or the Guard, you must set a configuration/policy, which defines the model policy to be used.
 
 - **Method:** `set_config(config_id: str) -> dict`
-- **Description:** Sets the configuration to be used by the user.
+- **Description:** Sets the policy to be used by the user.
   
   **Parameters:**
-  - `config_id`: The ID of the configuration you want to apply.
+  - `config_id`: The name of the policy you want to apply.
   
   **Example:**
   ```python
@@ -139,15 +139,21 @@ The `chat_guard` method allows you to send a message to Tumeryk's Guard system, 
   print(response)
   ```
 
-## Dependencies for Tumeryk Proxy API Client
+## Dependencies for Tumeryk Proxy API Client + UI
 
-- `os`
-- `requests`
-- `jwt`
-- `langchain`
-- `langchain_community`
-- `dotenv`
-- `proxy_core` (custom module)
+- fastapi
+- uvicorn
+- openai
+- requests
+- aiofiles
+- jinja2
+- PyJWT
+- python-multipart
+- langchain
+- langchain_community
+- python-dotenv
+- jwt
+
 
 ## Environment Variables
 
