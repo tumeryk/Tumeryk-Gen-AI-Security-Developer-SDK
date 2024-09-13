@@ -17,7 +17,7 @@ load_dotenv()
 class ApiClient:
     """API Client for Proxy Guard Core"""
 
-    def __init__(self, base_url=os.getenv("BASE_URL")):
+    def __init__(self, base_url=os.getenv("BASE_URL","https://chat.tmryk.com")):
         self.base_url = base_url
         self.token = None
         self.user_data = None  # Initialize user data as None
