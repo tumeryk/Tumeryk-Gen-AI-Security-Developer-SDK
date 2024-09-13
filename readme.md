@@ -27,16 +27,23 @@ Tumeryk Proxy is designed for secure interaction with LLMs and the Guard system.
    - Create a `.env` file in the project root.
    - Add your environment variables, e.g.:
      ```
-     JWT_SECRET_KEY=your_jwt_secret
+     BASE_URL="https://chat.tmryk.com"
      ```
 
 4. Request access to Tumeryk:
    - Sign up at https://tumeryk.com/sign-up to create your user ID and password.
 
-5. Run the application:
+
+## UI vs. API Client
+
+- **UI**: The Tumeryk Proxy UI offers a limited UI interface with integrated logging and configuration management for demo purposes. 
+
+ Run the application via:
    ```bash
    uvicorn main:app --reload
    ```
+  
+- **API Client**: The `ApiClient` class provides direct, programmatic interaction with Tumeryk services. While it doesn’t include built-in logging, it allows granular control over API requests and is easily extensible. The way to use is demonstrated below.
 
 ## Running Tumeryk Proxy API Client
 
@@ -60,11 +67,10 @@ print(response)
 #### Constructor
 
 ```python
-ApiClient(base_url="http://chat.tmryk.com", jwt_secret=os.getenv("JWT_SECRET_KEY"))
+ApiClient(base_url="https://chat.tmryk.com")
 ```
 
-- **base_url** (str): The base URL for the API. Default is `"http://chat.tmryk.com"`.
-- **jwt_secret** (str): The secret key used for JWT authentication. Default is fetched from environment variable `JWT_SECRET_KEY`.
+- **base_url** (str): The base URL for the API. Default is `"https://chat.tmryk.com"`.
 
 ### API Client Features
 
@@ -130,21 +136,16 @@ The `chat_guard` method allows you to send a message to Tumeryk's Guard system, 
   print(response)
   ```
 
-## UI vs. API Client
-
-- **UI**: The Tumeryk Proxy UI offers an intuitive interface with integrated logging and configuration management. It is designed for easy, secure communication with models and the Guard system.
-  
-- **API Client**: The `ApiClient` class provides direct, programmatic interaction with Tumeryk services. While it doesn’t include built-in logging, it allows granular control over API requests and is easily extensible.
-
-## Dependencies
+## Dependencies for Tumeryk Proxy API Client
 
 - `os`
 - `requests`
 - `jwt`
 - `langchain`
+- `langchain_community`
 - `dotenv`
 - `proxy_core` (custom module)
 
 ## Environment Variables
 
-- **JWT_SECRET_KEY**: The secret key used for JWT authentication. You need to define this in the `.env` file.
+- **BASE_URL**: The base url for the proxy client. The default is "https://chat.tmryk.com"
