@@ -53,7 +53,7 @@ The `ApiClient` class allows direct interaction with the Tumeryk Proxy API.
 ### Example Usage
 
 ```python
-from proxy_core.api_client import ApiClient
+from tumeryk_proxy.api_client import ApiClient
 
 client = ApiClient()
 client.login("username", "password")
