@@ -156,6 +156,6 @@ The `chat_guard` method allows you to send a message to Tumeryk's Guard system, 
 - jwt
 
 
-## Necessary Environment Variables
+## Environment Variables
 
-- **BASE_URL**: The base url for the proxy client. 
+- **BASE_URL**: The base url for the proxy client. Default is `https://chat.tmryk.com`
