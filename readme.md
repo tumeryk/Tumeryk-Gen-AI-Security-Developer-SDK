@@ -35,13 +35,13 @@ Tumeryk Proxy is designed for secure interaction with LLMs and the Tumeryk Guard
 
 ## UI vs. API Client
 
-- **UI**: The Tumeryk Proxy UI offers a limited interface with integrated logging and configuration management for demo purposes. It requires a `JWT_SECRET_KEY` stored in the environment.
+- **UI**: The Tumeryk Proxy UI offers a limited interface with integrated logging and configuration management for demo purposes. It uses a `JWT_SECRET_KEY` stored in the environment.
 
    Run the application via:
    ```bash
    uvicorn main:app --reload
    ```
-   The UI handles authentication with JWT tokens, stored in environment variables like `JWT_SECRET_KEY`. This is not required for API client usage.
+   The UI handles authentication with JWT tokens, stored in environment variables like `JWT_SECRET_KEY`. 
 
 - **API Client**: The `ApiClient` class provides direct, programmatic interaction with Tumeryk services. While it doesn’t include built-in logging, it allows granular control over API requests and is easily extensible.
 
