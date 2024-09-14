@@ -134,8 +134,8 @@ async def reports(request: Request):
     if cookie:
         try:
             decode = jwt.decode(cookie, algorithms="HS256", key=JWT_SECRET_KEY)
-            # user = decode.get("sub")
-            # user_data = get_user_data(user)  # Retrieve the UserData object
+            user = decode.get("sub")
+            user_data = get_user_data(user)  # Retrieve the UserData object
             # Directly access the config_id attribute
             config_id = api_client.user_data.config_id
         except jwt.ExpiredSignatureError:
