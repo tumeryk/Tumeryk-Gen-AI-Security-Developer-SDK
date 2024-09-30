@@ -7,7 +7,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain_anthropic import AnthropicLLM
 
 from langchain_community.llms import Cohere, HuggingFaceHub
-from user_data import get_user_data
+from .user_data import get_user_data
 from dotenv import load_dotenv
 import yaml
 
