@@ -10,3 +10,4 @@ langchain
 langchain_community
 python-dotenv
 jwt
+langchain_anthropic
