@@ -81,15 +81,15 @@ class ApiClient:
             params={"config_id": config_id},
         )
         response.raise_for_status()
-        api_key_data = response.json().get("api_key_value_pair")
+        api_key_data = response.json()
 
-        if api_key_data is None:
+        if "api_key_value" not in api_key_data:
             raise ValueError(
                 f"No API key was found for Config ID: {config_id}. Response: {response.json()}"
             )
 
         # Cache the API key for future use
-        self.user_data.api_key_cache[config_id] = api_key_data
+        self.user_data.api_key_cache[config_id] = api_key_data.get("api_key_value")
         return api_key_data
 
     def _fetch_model_and_engine_from_config(self, config_name: str) -> tuple:
