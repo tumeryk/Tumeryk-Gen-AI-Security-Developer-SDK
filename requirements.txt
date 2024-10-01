@@ -12,3 +12,4 @@ python-dotenv
 langchain_anthropic
 csv 
 re
+litellm

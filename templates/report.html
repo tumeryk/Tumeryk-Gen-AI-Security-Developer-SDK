@@ -1,46 +1,79 @@
 {% extends "layout.html" %}
 {% block content %}
-
   <h3 class="center-align">Reports</h3>
 
-  <!-- Log Table -->
-  <div class="section">
-    <div class="card">
-      <div class="card-content">
-        <span class="card-title">Interaction Log</span>
-        <div class="table-responsive">
-          <table class="striped">
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>User</th>
-                <th>Message</th>
-                <th>Bot Response Time</th>
-                <th>Guard Response Time</th>
-                <th>Engine/Model</th>
-                <th>Bot Response</th>
-                <th>Guard Response</th>
-                <th>Violation</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for log in logs %}
-              <tr>
-                <td>{{ log.Timestamp }}</td>
-                <td>{{ log.User }}</td>
-                <td>{{ log.Message }}</td>
-                <td>{{ log.BotResponseTime }}</td>
-                <td>{{ log.GuardResponseTime }}</td>
-                <td>{{ log.Engine }}</td>
-                <td>{{ log.ConfigID }}</td>
-                <td>{{ log.BotResponse }}</td>
-                <td>{{ log.GuardResponse }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
+  <div class="card-content">
+
+    <!-- Single checkbox to control both Model and Guard Response Times -->
+    <div>
+      <label>
+        <input type="checkbox" id="toggleResponseTimes" checked>
+        Show Response Times (Model & Guard)
+      </label>
+    </div>
+
+    <div class="table-responsive">
+      <table class="striped">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Message</th>
+            <th>Engine/Model</th>
+            <th>Config ID</th>
+            <th>Model Response</th>
+            <th>Guard Response</th>
+            <th>Violation</th>
+            <th>Model Tokens</th>
+            <th>Guard Tokens</th>
+            <!-- Columns for Response Times -->
+            <th class="response-time-header">Model Response Time</th>
+            <th class="response-time-header">Guard Response Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+          <tr>
+            <td>{{ log.Timestamp }}</td>
+            <td>{{ log.User }}</td>
+            <td>{{ log.Message }}</td>
+            <td>{{ log.Engine }}/{{ log.Model }}</td>
+            <td>{{ log.ConfigID }}</td>
+            <td>{{ log.BotResponse }}</td>
+            <td>{{ log.GuardResponse }}</td>
+            <td>{{ log.Violation }}</td>
+            <td>{{ log.BotTokens }}</td>
+            <td>{{ log.GuardTokens }}</td>
+            <!-- Cells for Response Times -->
+            <td class="response-time">{{ log.BotResponseTime }}</td>
+            <td class="response-time">{{ log.GuardResponseTime }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
+
+  <!-- JavaScript to handle the toggling of both columns -->
+  <script>
+    // Function to toggle visibility of both Response Time columns
+    function toggleResponseTimes(isVisible) {
+      const responseTimeElements = document.querySelectorAll('.response-time, .response-time-header');
+      responseTimeElements.forEach(function(element) {
+        element.style.display = isVisible ? '' : 'none';
+      });
+    }
+
+    // Initialize the toggle with the checkbox state
+    document.getElementById('toggleResponseTimes').addEventListener('change', function() {
+      const isChecked = this.checked;
+      toggleResponseTimes(isChecked);
+    });
+
+    // Ensure initial state reflects checkbox
+    document.addEventListener('DOMContentLoaded', function() {
+      const responseTimesChecked = document.getElementById('toggleResponseTimes').checked;
+      toggleResponseTimes(responseTimesChecked);
+    });
+  </script>
 {% endblock %}
