@@ -32,7 +32,7 @@
           </tr>
         </thead>
         <tbody>
-          {% for log in logs %}
+          {% for log in logs | reverse %}
           <tr>
             <td>{{ log.Timestamp }}</td>
             <td>{{ log.User }}</td>
