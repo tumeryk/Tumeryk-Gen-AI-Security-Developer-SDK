@@ -108,8 +108,8 @@ class ApiClient:
         """Initialize the LLM using LiteLLM based on the model and engine."""
         
         def get_completion(messages):
-            # Only apply max_tokens if the model is gpt-3.5-turbo
-            if 'gpt-3.5-turbo' in model:
+            # Only apply max_tokens if the model is gpt-3.5-turbo-instruct
+            if 'gpt-3.5-turbo-instruct' in model:
                 return completion(model=model, messages=messages, api_key=api_key_value, max_tokens=3000)
             else:
                 return completion(model=model, messages=messages, api_key=api_key_value)
