@@ -76,7 +76,7 @@ async def chat(
         chat_response, bot_response_time = measure_time(api_client.chat, user_input)
         user_data.chat_log.append(user_input)
         user_data.chat_responses.append(chat_response.choices[0].message.content)
-        bot_tokens = chat_response.usage.total_tokens
+        bot_tokens = chat_response.usage.completion_tokens
         background_tasks.add_task(
             runasync, user_input, user, user_data, chat_response.choices[0].message.content, bot_response_time,bot_tokens
         )
@@ -103,7 +103,7 @@ def runasync(user_input, user_name, user_data, chat_response, bot_response_time,
     )
     message  = guard_response['messages'][0]['content']
     stats = guard_response['messages'][0]['Stats']
-    guard_tokens =  int(re.search(r'(\d+) total tokens', stats).group(1))
+    guard_tokens =  int(re.search(r'(\d+) total completion tokens', stats).group(1))
 
     violation = guard_response['messages'][0]['violation']
 
