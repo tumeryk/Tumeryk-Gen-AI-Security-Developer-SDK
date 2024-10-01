@@ -1,6 +1,8 @@
 import os
 import logging
 from datetime import datetime
+import csv
+import re
 
 LOG_DIRECTORY = os.getenv("LOG_DIRECTORY", "./logs")
 
@@ -55,3 +57,44 @@ def log_interaction(
     )
 
     logger.info(log_message)
+
+
+def fetch_logs(user: str):
+    """Fetch logs for a specific user."""
+    today = datetime.now().strftime("%Y-%m-%d")
+    user_log_dir = os.path.join(LOG_DIRECTORY, user)
+    log_file_path = os.path.join(user_log_dir, f"{today}.log")
+    
+    logs = []
+    if os.path.exists(log_file_path):
+        with open(log_file_path, 'r') as file:
+            for line in file:
+                # Skip header lines
+                if "Timestamp,User,Level,Message" in line:
+                    continue
+                
+                # Parse the log line
+                match = re.match(r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}), (\w+), (\w+), (.+)', line)
+                if match:
+                    timestamp, log_user, level, rest = match.groups()
+                    # Parse the rest of the line using csv module to handle quoted fields
+                    reader = csv.reader([rest])
+                    fields = next(reader)
+                    
+                    # Create a dictionary with the parsed data
+                    log_entry = {
+                        "Timestamp": timestamp,
+                        "User": log_user,
+                        "Level": level,
+                        "Message": fields[0],
+                        "BotResponseTime": fields[1],
+                        "GuardResponseTime": fields[2],
+                        "Engine": fields[3],
+                        "Model": fields[4],
+                        "ConfigID": fields[5],
+                        "BotResponse": fields[6],
+                        "GuardResponse": fields[7],
+                    }
+                    logs.append(log_entry)
+    
+    return logs

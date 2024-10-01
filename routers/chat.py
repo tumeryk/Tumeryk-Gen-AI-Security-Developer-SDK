@@ -10,6 +10,7 @@ from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 import os
 from fastapi.responses import RedirectResponse
+from tumeryk_proxy.logger import fetch_logs
 
 load_dotenv()  # Load environment variables from .env
 
@@ -17,7 +18,7 @@ templates = Jinja2Templates(directory="templates")
 router = APIRouter()
 api_client = client
 # Move the JWT secret key to an environment variable
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY","abc1234")
 
 
 def measure_time(func, *args, **kwargs):
@@ -127,34 +128,27 @@ def runasync(user_input, user_name, user_data, chat_response, bot_response_time)
 @router.get("/reports", response_class=HTMLResponse)
 async def reports(request: Request):
     """Render the reports page showing logs and responses."""
-    config_id = None
     cookie = request.cookies.get("proxy")
-    user_data = None  # Initialize user_data to None
-
     if cookie:
         try:
             decode = jwt.decode(cookie, algorithms="HS256", key=JWT_SECRET_KEY)
             user = decode.get("sub")
-            user_data = get_user_data(user)  # Retrieve the UserData object
-            # Directly access the config_id attribute
-            config_id = api_client.user_data.config_id
+            user_data = get_user_data(user)
+            
+            # Fetch log data
+            logs = fetch_logs(user)
+            
+            return templates.TemplateResponse(
+                "report.html",
+                {
+                    "request": request,
+                    "logs": logs,
+                    "config_id": api_client.user_data.config_id,
+                },
+            )
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=403, detail="Token has expired")
         except jwt.InvalidTokenError:
             raise HTTPException(status_code=403, detail="Invalid token")
-
-    if user_data is None:
-        raise HTTPException(status_code=403, detail="User data not found")
-
-    return templates.TemplateResponse(
-        "report.html",
-        {
-            "request": request,
-            "chat_log": user_data.chat_log,
-            "chat_log_responses": user_data.chat_responses,
-            "guard": user_data.guard,
-            "guard_log": user_data.guard_log,
-            "guard_log_responses": user_data.guard_log_response,
-            "config_id": config_id,
-        },
-    )
+    
+    raise HTTPException(status_code=403, detail="Authentication required")

@@ -1,77 +1,40 @@
-{% include 'layout.html' %}
-<div class="container mt-5">
-  <h3 class="center-align">
-    Reports:
-  </h3>
+{% extends "layout.html" %}
+{% block content %}
 
-  <!-- chat log -->
+  <h3 class="center-align">Reports</h3>
+
+  <!-- Log Table -->
   <div class="section">
     <div class="card">
       <div class="card-content">
-        <span class="card-title">Chat Log OpenAI direct:</span>
-        <div>
-          {% for log in chat_log %}
-          <div>
-            {{ loop.index }}. {{ log }}
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- chat log response -->
-  <div class="section">
-    <div class="card">
-      <div class="card-content">
-        <span class="card-title">Chat Log Response OpenAI direct:</span>
-        <div>
-          {% for log_response in chat_log_responses %}
-          <div>
-            {{ loop.index }}. {{ log_response }}
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- guard -->
-  <div class="section">
-    <div class="card">
-      <div class="card-content">
-        <span class="card-title">Guard Input:</span>
-        <div>
-          {% for g in guard %}
-          <div>
-            {{ loop.index }}. {{ g }}
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- guard log -->
-  <div class="section">
-    <div class="card">
-      <div class="card-content">
-        <span class="card-title">Guard Log Response:</span>
-        <div>
-          <table class="highlight">
+        <span class="card-title">Interaction Log</span>
+        <div class="table-responsive">
+          <table class="striped">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Config ID</th>
-                <th>Log</th>
+                <th>Timestamp</th>
+                <th>User</th>
+                <th>Message</th>
+                <th>Bot Response Time</th>
+                <th>Guard Response Time</th>
+                <th>Engine/Model</th>
+                <th>Bot Response</th>
+                <th>Guard Response</th>
+                <th>Violation</th>
               </tr>
             </thead>
             <tbody>
-              {% for g_log in guard_log %}
+              {% for log in logs %}
               <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ config_id }}</td>
-                <td>{{ g_log }}</td>
+                <td>{{ log.Timestamp }}</td>
+                <td>{{ log.User }}</td>
+                <td>{{ log.Message }}</td>
+                <td>{{ log.BotResponseTime }}</td>
+                <td>{{ log.GuardResponseTime }}</td>
+                <td>{{ log.Engine }}</td>
+                <td>{{ log.ConfigID }}</td>
+                <td>{{ log.BotResponse }}</td>
+                <td>{{ log.GuardResponse }}</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -80,3 +43,4 @@
       </div>
     </div>
   </div>
+{% endblock %}
