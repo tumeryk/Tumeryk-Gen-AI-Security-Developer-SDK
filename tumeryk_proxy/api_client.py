@@ -107,18 +107,8 @@ class ApiClient:
     def initialize_llm(service_name: str, api_key_value: str, model: str):
         """Initialize the LLM using LiteLLM based on the model and engine."""
         # Set the API key in environment variables for LiteLLM
-        if service_name == "openai":
-            os.environ["OPENAI_API_KEY"] = api_key_value
-        elif service_name == "cohere":
-            os.environ["COHERE_API_KEY"] = api_key_value
-        elif service_name == "anthropic":
-            os.environ["ANTHROPIC_API_KEY"] = api_key_value
-        else:
-            raise ValueError(f"Unsupported service: {service_name}")
-
-        # Return a function to fetch completion using LiteLLM
         def get_completion(messages):
-            return completion(model=model, messages=messages)
+            return completion(model=model, messages=messages,api_key=api_key_value)
 
         return get_completion
 
