@@ -106,11 +106,16 @@ class ApiClient:
     @staticmethod
     def initialize_llm(service_name: str, api_key_value: str, model: str):
         """Initialize the LLM using LiteLLM based on the model and engine."""
-        # Set the API key in environment variables for LiteLLM
+        
         def get_completion(messages):
-            return completion(model=model, messages=messages,api_key=api_key_value)
-
+            # Only apply max_tokens if the model is gpt-3.5-turbo
+            if 'gpt-3.5-turbo' in model:
+                return completion(model=model, messages=messages, api_key=api_key_value, max_tokens=3000)
+            else:
+                return completion(model=model, messages=messages, api_key=api_key_value)
+        
         return get_completion
+
 
     def chat(self, user_input: str) -> str:
         """Send user input to the LLM and return the response."""
@@ -122,6 +127,7 @@ class ApiClient:
         
         llm = self._get_llm_chain(config_id)
         response = llm([{"role": "user", "content": user_input}])
+        print(response)
         return response
 
     def chat_guard(self, user_input: str):
