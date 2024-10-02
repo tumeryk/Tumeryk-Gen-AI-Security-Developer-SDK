@@ -127,7 +127,6 @@ class ApiClient:
         
         llm = self._get_llm_chain(config_id)
         response = llm([{"role": "user", "content": user_input}])
-        print(response)
         return response
 
     def chat_guard(self, user_input: str):
