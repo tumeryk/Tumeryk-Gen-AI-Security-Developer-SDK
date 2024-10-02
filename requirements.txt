@@ -10,6 +10,4 @@ langchain
 langchain_community
 python-dotenv
 langchain_anthropic
-csv 
-re
 litellm
