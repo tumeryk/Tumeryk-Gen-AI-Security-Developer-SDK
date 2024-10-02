@@ -7,7 +7,7 @@
     <!-- Single checkbox to control both Model and Guard Response Times -->
     <div>
       <label>
-        <input type="checkbox" id="toggleResponseTimes" checked>
+        <input type="checkbox" id="toggleResponseTimes">
         Show Response Times (Model & Guard)
       </label>
     </div>
@@ -72,8 +72,10 @@
 
     // Ensure initial state reflects checkbox
     document.addEventListener('DOMContentLoaded', function() {
-      const responseTimesChecked = document.getElementById('toggleResponseTimes').checked;
-      toggleResponseTimes(responseTimesChecked);
+      const urlParams = new URLSearchParams(window.location.search);
+      const showTimes = urlParams.has('time');
+      document.getElementById('toggleResponseTimes').checked = showTimes;
+      toggleResponseTimes(showTimes);
     });
   </script>
 {% endblock %}
