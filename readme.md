@@ -17,7 +17,7 @@ Tumeryk Proxy is designed for secure interaction with LLMs and the Tumeryk Guard
 ## Setup Instructions
 
 
-## Running the Installer Shell Script
+### Running the Installer Shell Script
 
 1. Download `Run_Tumeryk_Proxy.sh`.
 2. Open the terminal and navigate to the script location.
