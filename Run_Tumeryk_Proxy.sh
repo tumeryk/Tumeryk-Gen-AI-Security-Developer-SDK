@@ -1,18 +1,26 @@
+#!/bin/bash
 
-# Step 1: Clone the Repository (if it doesn't exist)
-# ==================================================
-# Define the repository name and directory
+# Define the repository name and URL
 REPO_NAME="Tumeryk-Gen-AI-Security-Developer-SDK"
 REPO_URL="https://github.com/tumeryk/Tumeryk-Gen-AI-Security-Developer-SDK.git"
 
-# Check if the repository directory already exists
-if [ ! -d "$REPO_NAME" ]; then
-  # Clone the repository from GitHub
-  git clone $REPO_URL || { echo 'Failed to clone the repository. Please check your internet connection or the repository URL.'; exit 1; }
-fi
+# Check if the script is being run inside the repository directory
+CURRENT_DIR=${PWD##*/}
 
-# Navigate into the cloned directory
-cd $REPO_NAME || { echo 'Failed to enter the project directory. Please check if the repository was cloned correctly.'; exit 1; }
+if [ "$CURRENT_DIR" == "$REPO_NAME" ]; then
+  echo "You are already inside the $REPO_NAME directory."
+else
+  # Check if the repository directory exists in the current path
+  if [ -d "$REPO_NAME" ]; then
+    echo "$REPO_NAME directory already exists. Moving into it."
+    cd $REPO_NAME || { echo 'Failed to enter the project directory. Please check permissions.'; exit 1; }
+  else
+    # Clone the repository if it doesn't exist
+    echo "Cloning the repository..."
+    git clone $REPO_URL || { echo 'Failed to clone the repository. Please check your internet connection or the repository URL.'; exit 1; }
+    cd $REPO_NAME || { echo 'Failed to enter the project directory. Please check if the repository was cloned correctly.'; exit 1; }
+  fi
+fi
 
 # Step 2: Create a Virtual Environment and Install Dependencies
 # ============================================================
@@ -59,6 +67,3 @@ elif command -v open > /dev/null; then
 else
   echo "Please open http://0.0.0.0:8500 in your web browser."
 fi
-
-# ==========================
-# After running this script, the server will start automatically and be available at http://0.0.0.0:8500
