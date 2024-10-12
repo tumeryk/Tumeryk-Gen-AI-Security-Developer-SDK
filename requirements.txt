@@ -6,8 +6,5 @@ aiofiles
 jinja2
 PyJWT
 python-multipart
-langchain
-langchain_community
 python-dotenv
-langchain_anthropic
 litellm
