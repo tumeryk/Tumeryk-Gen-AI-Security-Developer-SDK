@@ -61,9 +61,9 @@ sleep 5
 
 # Open the FastAPI application in the default web browser
 if command -v xdg-open > /dev/null; then
-  xdg-open http://0.0.0.0:8500
+  xdg-open http://127.0.0.1:8500
 elif command -v open > /dev/null; then
-  open http://0.0.0.0:8500
+  open http://127.0.0.1:8500
 else
   echo "Please open http://0.0.0.0:8500 in your web browser."
 fi
