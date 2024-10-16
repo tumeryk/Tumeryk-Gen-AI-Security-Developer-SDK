@@ -1,3 +1,5 @@
+#Copyright © 2024 Tumeryk, Inc.
+
 class UserData:
     """Class to store data associated with each user."""
 

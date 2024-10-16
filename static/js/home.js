@@ -1,3 +1,5 @@
+//Copyright © 2024 Tumeryk, Inc.
+
 document.addEventListener('DOMContentLoaded', function() {
     var elems = document.querySelectorAll('select');
     var instances = M.FormSelect.init(elems);

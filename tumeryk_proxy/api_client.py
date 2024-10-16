@@ -1,3 +1,6 @@
+
+#Copyright © 2024 Tumeryk, Inc.
+
 import os
 import requests
 from litellm import completion

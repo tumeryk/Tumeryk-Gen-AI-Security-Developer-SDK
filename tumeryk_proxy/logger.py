@@ -1,3 +1,5 @@
+#Copyright © 2024 Tumeryk, Inc.
+
 import os
 import csv
 from datetime import datetime
