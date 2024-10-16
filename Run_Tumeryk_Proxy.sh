@@ -65,5 +65,5 @@ if command -v xdg-open > /dev/null; then
 elif command -v open > /dev/null; then
   open http://127.0.0.1:8500
 else
-  echo "Please open http://0.0.0.0:8500 in your web browser."
+  echo "Please open http://127.0.0.1:8500 in your web browser."
 fi
