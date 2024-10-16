@@ -85,7 +85,7 @@ from tumeryk_proxy.api_client import ApiClient
 client = ApiClient()
 client.login("username", "password")
 client.set_config("hr_policy")
-response = client.chat("What is the capital of France?")
+response = client.chat_guard("What is the capital of France?")
 print(response)
 ```
 
