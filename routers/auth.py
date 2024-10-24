@@ -29,10 +29,9 @@ JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "abc1234")
 def login_test(username: str = Form(), password: str = Form()):
     """Authenticate user and redirect to portal if successful."""
     try:
-        # Login with tumeryk_guardrails
+        tumeryk_guardrails.set_base_url(os.getenv("TUMERYK_BASE_URL", "https://chat.tmryk.com"))
         tumeryk_guardrails.login(username, password)
-        
-        # Get user data for session management
+            # Get user data for session management
         user_data = get_user_data(username)
         user_data.username = username
         
@@ -45,8 +44,6 @@ def login_test(username: str = Form(), password: str = Form()):
         
         # Initialize bot client with token
         bot_client.set_token(token, username)
-        
-        # Get available policies
         policies = tumeryk_guardrails.get_policies()
         user_data.configs = policies
         

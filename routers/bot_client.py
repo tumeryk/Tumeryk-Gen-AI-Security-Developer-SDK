@@ -51,11 +51,8 @@ class BotClient:
     def _fetch_model_config(self, config_id: str) -> tuple:
         """Fetch model and engine from config."""
         headers = self._get_headers()
-        response = requests.get(
-            f"{self.base_url}/read_config",
-            headers=headers,
-            params={"config_name": config_id},
-        )
+        url = f"{self.base_url}/read_config?config_name={config_id}"
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
         
         config_data = response.json()
@@ -91,14 +88,14 @@ class BotClient:
         # Use litellm with the configured model
         if 'gpt-3.5-turbo-instruct' in model_info["model"]:
             return completion(
-                model=model_info["model"],
+                model=f"{model_info['engine']}/{model_info['model']}",  # Combine engine and model
                 messages=messages,
                 api_key=model_info["api_key"],
                 max_tokens=3000
             )
         else:
             return completion(
-                model=model_info["model"],
+                model=f"{model_info['engine']}/{model_info['model']}",  # Combine engine and model
                 messages=messages,
                 api_key=model_info["api_key"]
             )

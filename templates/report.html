@@ -34,19 +34,19 @@
         <tbody>
           {% for log in logs | reverse %}
           <tr>
-            <td>{{ log.Timestamp }}</td>
-            <td>{{ log.User }}</td>
-            <td>{{ log.Message }}</td>
-            <td>{{ log.Engine }}/{{ log.Model }}</td>
-            <td>{{ log.ConfigID }}</td>
-            <td>{{ log.BotResponse }}</td>
-            <td>{{ log.GuardResponse }}</td>
-            <td>{{ log.Violation }}</td>
-            <td>{{ log.BotTokens }}</td>
-            <td>{{ log.GuardTokens }}</td>
+            <td>{{ log.timestamp }}</td>
+            <td>{{ log.user }}</td>
+            <td>{{ log.message }}</td>
+            <td>{{ log.engine }}/{{ log.model }}</td>
+            <td>{{ log.config_id }}</td>
+            <td>{{ log.bot_response }}</td>
+            <td>{{ log.guard_response }}</td>
+            <td>{{ log.violation }}</td>
+            <td>{{ log.bot_tokens }}</td>
+            <td>{{ log.guard_tokens }}</td>
             <!-- Cells for Response Times -->
-            <td class="response-time">{{ log.BotResponseTime }}</td>
-            <td class="response-time">{{ log.GuardResponseTime }}</td>
+            <td class="response-time">{{ log.bot_response_time }}</td>
+            <td class="response-time">{{ log.guard_response_time }}</td>
           </tr>
           {% endfor %}
         </tbody>

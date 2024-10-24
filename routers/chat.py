@@ -7,7 +7,6 @@ import jwt
 import os
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
-import re
 import tumeryk_guardrails
 from .user_data import get_user_data, log_interaction, fetch_logs
 from .bot_client import bot_client
@@ -56,7 +55,10 @@ async def chat_page(request: Request):
 
 @router.post("/portal", response_class=HTMLResponse)
 async def chat(
-    request: Request, background_tasks: BackgroundTasks, user_input: str = Form()
+    request: Request, 
+    background_tasks: BackgroundTasks, 
+    user_input: str = Form(),
+    config_name: str = Form()
 ):
     """Handle chat input and generate a response using both bot and guard."""
     post_cookie = request.cookies.get("proxy")
@@ -72,14 +74,11 @@ async def chat(
         # Format messages
         messages = [{"role": "user", "content": user_input}]
         
-        # Get current policy
-        config_id = os.getenv("TUMERYK_POLICY")
-        
         # Get bot response using configured model
         bot_response, bot_response_time = measure_time(
             bot_client.get_completion,
             messages=messages,
-            config_id=config_id
+            config_id=config_name
         )
         
         # Get guard response using tumeryk_guardrails
@@ -90,9 +89,9 @@ async def chat(
 
         # Extract guard response details
         guard_message = guard_response['messages'][0]['content']
-        stats = guard_response['messages'][0]['Stats']
+        stats = guard_response['messages'][0]['stats']  # Updated stats path
         violation = guard_response['messages'][0]['violation']
-        guard_tokens = int(re.search(r'(\d+) total completion tokens', stats).group(1))
+        guard_tokens = stats['total_completion_tokens']  # Get tokens from new stats structure
         
         # Update user data
         user_data.chat_log.append(user_input)
@@ -101,7 +100,7 @@ async def chat(
         user_data.guard.append(user_input)
 
         # Get model info for logging
-        model_info = user_data.models[config_id]
+        model_info = user_data.models[config_name]
 
         # Log the interaction in background
         background_tasks.add_task(
@@ -112,7 +111,7 @@ async def chat(
             guard_response_time=f"{guard_response_time:.2f}",
             engine=model_info["engine"],
             model=model_info["model"],
-            config_id=config_id,
+            config_id=config_name,
             bot_response=bot_response.choices[0].message.content,
             guard_response=guard_message,
             violation=violation,
@@ -150,13 +149,11 @@ async def reports(request: Request):
                 "report.html",
                 {
                     "request": request,
-                    "logs": logs,
-                    "config_id": os.getenv("TUMERYK_POLICY", "default"),
+                    "logs": logs
                 },
             )
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=403, detail="Token has expired")
-        except jwt.InvalidTokenError:
-            raise HTTPException(status_code=403, detail="Invalid token")
+
     
     raise HTTPException(status_code=403, detail="Authentication required")
