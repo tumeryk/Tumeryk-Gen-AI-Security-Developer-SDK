@@ -88,5 +88,5 @@ The script will automatically:
    - View interaction logs
    - View response times
    - View token usage statistics
-   - View security violations
+   - View violations
 
