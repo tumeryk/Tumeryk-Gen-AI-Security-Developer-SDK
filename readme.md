@@ -2,22 +2,20 @@
 
 ## Overview
 The Tumeryk Gen AI Security Developer SDK Demo App showcases secure interaction with LLMs through:
-1. LLM interactions using model configurations from YAML files
-2. Security guardrails via the `tumeryk_guardrails` package
-
-The demo app provides a web interface built with FastAPI that demonstrates these capabilities in action.
+1. LLM interactions 
+2. Guardrails via the `tumeryk_guardrails` package
 
 ## UI Features
 
 ### Portal Interface
 - LLM interactions 
-- Policy selection for different security rules
+- Policy selection for different guardrails rules
 
 ### Reports Page
 - Interaction logs
 - Response times for both LLM and guard
 - Token usage statistics
-- Security violation tracking
+- Violation tracking
 
 ## Setup Instructions
 
@@ -64,7 +62,6 @@ The script will automatically:
      TUMERYK_PASSWORD=your_password
      TUMERYK_POLICY=your_policy
      TUMERYK_BASE_URL=https://chat.tmryk.com
-     JWT_SECRET_KEY=your_jwt_secret
      ```
 
 5. Request access to Tumeryk:
