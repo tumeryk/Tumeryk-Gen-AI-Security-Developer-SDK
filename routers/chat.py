@@ -5,35 +5,26 @@ from fastapi.responses import HTMLResponse
 import time
 import jwt
 import os
-from tumeryk_proxy.user_data import get_user_data
-from tumeryk_proxy.logger import log_interaction
-from tumeryk_proxy.api_client import client
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
-import os
-from fastapi.responses import RedirectResponse
-from tumeryk_proxy.logger import fetch_logs
 import re
+import tumeryk_guardrails
+from .user_data import get_user_data, log_interaction, fetch_logs
+from .bot_client import bot_client
 
-load_dotenv()  # Load environment variables from .env
+load_dotenv()
 
 templates = Jinja2Templates(directory="templates")
 router = APIRouter()
-api_client = client
-# Move the JWT secret key to an environment variable
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY","abc1234")
-
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "abc1234")
 
 def measure_time(func, *args, **kwargs):
-    """
-    Utility function to measure the execution time of a function in  seconds.
-    """
+    """Utility function to measure the execution time of a function."""
     start_time = time.time()
     result = func(*args, **kwargs)
     end_time = time.time()
     elapsed_time = end_time - start_time
     return result, elapsed_time
-
 
 @router.get("/portal", response_class=HTMLResponse)
 async def chat_page(request: Request):
@@ -44,6 +35,11 @@ async def chat_page(request: Request):
             decode = jwt.decode(cookie, algorithms="HS256", key=JWT_SECRET_KEY)
             user = decode.get("sub")
             user_data = get_user_data(user)
+            
+            # Get available policies
+            policies = tumeryk_guardrails.get_policies()
+            user_data.configs = policies
+            
             return templates.TemplateResponse(
                 "home.html",
                 {
@@ -58,12 +54,11 @@ async def chat_page(request: Request):
             raise HTTPException(status_code=403, detail="Invalid token")
     return templates.TemplateResponse("login.html", {"request": request})
 
-
 @router.post("/portal", response_class=HTMLResponse)
 async def chat(
     request: Request, background_tasks: BackgroundTasks, user_input: str = Form()
 ):
-    """Handle chat input and generate a response using the selected model."""
+    """Handle chat input and generate a response using both bot and guard."""
     post_cookie = request.cookies.get("proxy")
 
     if not post_cookie:
@@ -73,15 +68,58 @@ async def chat(
         decode = jwt.decode(post_cookie, algorithms="HS256", key=JWT_SECRET_KEY)
         user = decode.get("sub")
         user_data = get_user_data(user)
-        api_client.token = post_cookie  # Set the token for the API client
 
-        chat_response, bot_response_time = measure_time(api_client.chat, user_input)
-        user_data.chat_log.append(user_input)
-        user_data.chat_responses.append(chat_response.choices[0].message.content)
-        bot_tokens = chat_response.usage.completion_tokens
-        background_tasks.add_task(
-            runasync, user_input, user, user_data, chat_response.choices[0].message.content, bot_response_time,bot_tokens
+        # Format messages
+        messages = [{"role": "user", "content": user_input}]
+        
+        # Get current policy
+        config_id = os.getenv("TUMERYK_POLICY")
+        
+        # Get bot response using configured model
+        bot_response, bot_response_time = measure_time(
+            bot_client.get_completion,
+            messages=messages,
+            config_id=config_id
         )
+        
+        # Get guard response using tumeryk_guardrails
+        guard_response, guard_response_time = measure_time(
+            tumeryk_guardrails.tumeryk_completions,
+            messages=messages
+        )
+
+        # Extract guard response details
+        guard_message = guard_response['messages'][0]['content']
+        stats = guard_response['messages'][0]['Stats']
+        violation = guard_response['messages'][0]['violation']
+        guard_tokens = int(re.search(r'(\d+) total completion tokens', stats).group(1))
+        
+        # Update user data
+        user_data.chat_log.append(user_input)
+        user_data.chat_responses.append(bot_response.choices[0].message.content)
+        user_data.guard_log.append(guard_response)
+        user_data.guard.append(user_input)
+
+        # Get model info for logging
+        model_info = user_data.models[config_id]
+
+        # Log the interaction in background
+        background_tasks.add_task(
+            log_interaction,
+            user=user,
+            message=user_input,
+            bot_response_time=f"{bot_response_time:.2f}",
+            guard_response_time=f"{guard_response_time:.2f}",
+            engine=model_info["engine"],
+            model=model_info["model"],
+            config_id=config_id,
+            bot_response=bot_response.choices[0].message.content,
+            guard_response=guard_message,
+            violation=violation,
+            bot_tokens=bot_response.usage.completion_tokens,
+            guard_tokens=guard_tokens
+        )
+
         return templates.TemplateResponse(
             "home.html",
             {
@@ -96,40 +134,6 @@ async def chat(
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=403, detail="Invalid token")
 
-
-def runasync(user_input, user_name, user_data, chat_response, bot_response_time, bot_tokens):
-
-    # Measure guard response time
-    guard_response, guard_response_time = measure_time(
-        api_client.chat_guard, user_input
-    )
-    message  = guard_response['messages'][0]['content']
-    stats = guard_response['messages'][0]['Stats']
-    guard_tokens =  int(re.search(r'(\d+) total completion tokens', stats).group(1))
-
-    violation = guard_response['messages'][0]['violation']
-
-    # Append logs to user_data
-    user_data.guard.append(user_input)
-    user_data.guard_log.append(guard_response)
-
-    # Log the interaction
-    log_interaction(
-        user=user_name,
-        message=user_input,
-        bot_response_time=f"{bot_response_time:.2f}",
-        guard_response_time=f"{guard_response_time:.2f}",
-        engine=api_client.user_data.models[api_client.user_data.config_id]["engine"],
-        model=api_client.user_data.models[api_client.user_data.config_id]["model"],
-        config_id=api_client.user_data.config_id,
-        bot_response=chat_response,
-        guard_response=message,
-        violation=violation,
-        bot_tokens = bot_tokens,
-        guard_tokens=guard_tokens
-    )
-
-
 @router.get("/reports", response_class=HTMLResponse)
 async def reports(request: Request):
     """Render the reports page showing logs and responses."""
@@ -138,18 +142,16 @@ async def reports(request: Request):
         try:
             decode = jwt.decode(cookie, algorithms="HS256", key=JWT_SECRET_KEY)
             user = decode.get("sub")
-            user_data = get_user_data(user)
             
             # Fetch log data
             logs = fetch_logs(user)
-            print(logs)
             
             return templates.TemplateResponse(
                 "report.html",
                 {
                     "request": request,
                     "logs": logs,
-                    "config_id": api_client.user_data.config_id,
+                    "config_id": os.getenv("TUMERYK_POLICY", "default"),
                 },
             )
         except jwt.ExpiredSignatureError:

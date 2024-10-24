@@ -9,18 +9,19 @@ CURRENT_DIR=${PWD##*/}
 
 if [ "$CURRENT_DIR" == "$REPO_NAME" ]; then
   echo "You are already inside the $REPO_NAME directory."
-else
-  # Check if the repository directory exists in the current path
-  if [ -d "$REPO_NAME" ]; then
-    echo "$REPO_NAME directory already exists. Moving into it."
-    cd $REPO_NAME || { echo 'Failed to enter the project directory. Please check permissions.'; exit 1; }
-  else
-    # Clone the repository if it doesn't exist
-    echo "Cloning the repository..."
-    git clone $REPO_URL || { echo 'Failed to clone the repository. Please check your internet connection or the repository URL.'; exit 1; }
-    cd $REPO_NAME || { echo 'Failed to enter the project directory. Please check if the repository was cloned correctly.'; exit 1; }
-  fi
+  cd .. || { echo 'Failed to move up one directory.'; exit 1; }
 fi
+
+# Remove existing directory if it exists
+if [ -d "$REPO_NAME" ]; then
+  echo "Removing existing $REPO_NAME directory..."
+  rm -rf "$REPO_NAME" || { echo 'Failed to remove existing directory. Please check permissions.'; exit 1; }
+fi
+
+# Clone the repository
+echo "Cloning the repository..."
+git clone $REPO_URL || { echo 'Failed to clone the repository. Please check your internet connection or the repository URL.'; exit 1; }
+cd $REPO_NAME || { echo 'Failed to enter the project directory. Please check if the repository was cloned correctly.'; exit 1; }
 
 # Step 2: Create a Virtual Environment and Install Dependencies
 # ============================================================

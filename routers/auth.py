@@ -11,83 +11,90 @@ from fastapi import (
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.templating import Jinja2Templates
-
-from tumeryk_proxy.api_client import client
-from tumeryk_proxy.user_data import get_user_data
-import requests
+import tumeryk_guardrails
+from .user_data import get_user_data
+from .bot_client import bot_client
+import jwt
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 router = APIRouter()
-api_client = client
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/creds/")
 templates = Jinja2Templates(directory="templates")
-url = os.getenv("BASE_URL","https://chat.tmryk.com")
-
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "abc1234")
 
 @router.post("/login")
 def login_test(username: str = Form(), password: str = Form()):
     """Authenticate user and redirect to portal if successful."""
-    token_response = api_client.login(username, password)
-    if token_response.get("access_token"):
-        api_client.token = token_response["access_token"]
+    try:
+        # Login with tumeryk_guardrails
+        tumeryk_guardrails.login(username, password)
+        
+        # Get user data for session management
         user_data = get_user_data(username)
-
-        user_data.access_token = api_client.token
         user_data.username = username
-        user_data.password = password
-
-        try:
-            configs_response = requests.get(
-                f"{url}/v1/rails/configs",
-                headers={
-                    "accept": "application/json",
-                    "Authorization": f"Bearer {user_data.access_token}",
-                },
-            )
-            configs_response.raise_for_status()
-
-            configs_list = [
-                config.get("id")
-                for config in configs_response.json()
-                if config.get("id")
-            ]
-            # print(configs_list)
-            user_data.configs = configs_list  # Ensure configs are stored in UserData
-            print(user_data.configs)
-            resp = RedirectResponse(url="/portal", status_code=status.HTTP_302_FOUND)
-            resp.set_cookie("proxy", value=user_data.access_token)
-            return resp
-        except requests.exceptions.RequestException as e:
-            raise HTTPException(status_code=500, detail="Error fetching configs")
-
-    raise HTTPException(status_code=400, detail="User does not exist")
-
+        
+        # Create JWT token for session
+        token = jwt.encode(
+            {"sub": username},
+            JWT_SECRET_KEY,
+            algorithm="HS256"
+        )
+        
+        # Initialize bot client with token
+        bot_client.set_token(token, username)
+        
+        # Get available policies
+        policies = tumeryk_guardrails.get_policies()
+        user_data.configs = policies
+        
+        # Redirect to portal with token
+        resp = RedirectResponse(url="/portal", status_code=status.HTTP_302_FOUND)
+        resp.set_cookie("proxy", value=token)
+        return resp
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     """Render the home (login) page."""
     return templates.TemplateResponse("login.html", {"request": request})
 
-
 @router.post("/creds/")
 async def login(user: OAuth2PasswordRequestForm = Depends()):
     """Endpoint for user login, returning an access token."""
-    token_response = api_client.login(user.username, user.password)
-    if token_response.get("access_token"):
-        api_client.token = token_response["access_token"]
-        user_data = get_user_data(user.username)
-        user_data.access_token = api_client.token
-        return {"access_token": api_client.token}
-
-    raise HTTPException(status_code=400, detail="User does not exist")
-
+    try:
+        # Login with tumeryk_guardrails
+        tumeryk_guardrails.login(user.username, user.password)
+        
+        # Create JWT token
+        token = jwt.encode(
+            {"sub": user.username},
+            JWT_SECRET_KEY,
+            algorithm="HS256"
+        )
+        
+        # Initialize bot client with token
+        bot_client.set_token(token, user.username)
+        
+        return {"access_token": token}
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     """Retrieve and validate the current user based on the token."""
-    if not token or len(token) <= 20:
-        raise HTTPException(status_code=400, detail="Incorrect User Credentials")
-    return token
-
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=["HS256"])
+        username = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+        return username
+    except jwt.JWTError:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
 
 async def get_current_active_user(current_user: str = Depends(get_current_user)):
     """Return the current active user."""
