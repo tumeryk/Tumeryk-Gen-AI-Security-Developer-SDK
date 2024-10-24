@@ -16,4 +16,4 @@ app.include_router(chat.router)
 app.include_router(config.router)
 
 if __name__ == "__main__":
-    uvicorn.run(app="main:app", host="0.0.0.0", port=3000, reload=True)
+    uvicorn.run(app="main:app", host="0.0.0.0", port=8500, reload=True)
