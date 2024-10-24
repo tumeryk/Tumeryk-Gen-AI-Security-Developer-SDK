@@ -72,7 +72,7 @@ The script will automatically:
    uvicorn main:app --reload
    ```
 
-7. Access the web interface at `http://localhost:8000`
+7. Access the web interface at `http://localhost:8500`
 
 ## Using the Demo App
 
