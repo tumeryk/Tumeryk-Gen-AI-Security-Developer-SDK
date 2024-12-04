@@ -1,7 +1,7 @@
 #Copyright © 2024 Tumeryk, Inc.
 
-from fastapi import APIRouter, Form, BackgroundTasks, Request, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Form, BackgroundTasks, Request, HTTPException, Depends
+from fastapi.responses import HTMLResponse, JSONResponse
 import time
 import jwt
 import os
@@ -24,6 +24,7 @@ def measure_time(func, *args, **kwargs):
     end_time = time.time()
     elapsed_time = end_time - start_time
     return result, elapsed_time
+
 
 @router.get("/portal", response_class=HTMLResponse)
 async def chat_page(request: Request):
@@ -84,14 +85,14 @@ async def chat(
         # Get guard response using tumeryk_guardrails
         guard_response, guard_response_time = measure_time(
             tumeryk_guardrails.tumeryk_completions,
-            messages=messages
+            messages=messages  # Pass just the messages array
         )
 
         # Extract guard response details
         guard_message = guard_response['messages'][0]['content']
-        stats = guard_response['messages'][0]['stats']  # Updated stats path
-        violation = guard_response['messages'][0]['violation']
-        guard_tokens = stats['total_completion_tokens']  # Get tokens from new stats structure
+        stats = guard_response['messages'][0]['stats']
+        violation = guard_response['metrics']['violation']
+        guard_tokens = stats['total_completion_tokens']
         
         # Update user data
         user_data.chat_log.append(user_input)
