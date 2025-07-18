@@ -30,8 +30,8 @@ import time
 load_dotenv()
 
 router = APIRouter()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/creds/")
 templates = Jinja2Templates(directory="templates")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/creds/")
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "abc1234")
 
 # OAuth Configuration
