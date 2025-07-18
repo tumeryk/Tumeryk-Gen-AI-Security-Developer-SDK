@@ -9,3 +9,6 @@ python-dotenv
 tumeryk_guardrails
 litellm
 pyyaml
+authlib
+httpx
+cryptography
